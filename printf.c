@@ -126,6 +126,7 @@
 #include <float.h>
 #endif
 
+#define ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
 
 // output function type
 typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);
@@ -590,7 +591,7 @@ static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
     out((flags & FLAGS_UPPERCASE) ? 'E' : 'e', buffer, idx++, maxlen);
     // output the exponent value
     idx = _ntoa(out, buffer, idx, maxlen,
-                (NTOA_VALUE_TYPE)((expval < 0) ? -expval : expval),
+                (NTOA_VALUE_TYPE) ABS(expval),
                 expval < 0, 10, 0, minwidth-1,
                 FLAGS_ZEROPAD | FLAGS_PLUS);
     // might need to right-pad spaces
@@ -755,16 +756,16 @@ static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const
           if (flags & FLAGS_LONG_LONG) {
 #if PRINTF_SUPPORT_LONG_LONG
             const long long value = va_arg(va, long long);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE)(value > 0 ? value : 0 - value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
 #endif
           }
           else if (flags & FLAGS_LONG) {
             const long value = va_arg(va, long);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE)(value > 0 ? value : 0 - value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
           }
           else {
             const int value = (flags & FLAGS_CHAR) ? (signed char)va_arg(va, int) : (flags & FLAGS_SHORT) ? (short int)va_arg(va, int) : va_arg(va, int);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE)(value > 0 ? value : 0 - value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
           }
         }
         else {
