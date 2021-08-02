@@ -133,7 +133,7 @@ typedef uint8_t numeric_base_t;
 #include <float.h>
 #endif
 
-#define ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
+#define ABS(_x) ( (_x)>0 ? (NTOA_VALUE_TYPE)(_x) : -(NTOA_VALUE_TYPE)(_x))
 
 // output function type
 typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);
