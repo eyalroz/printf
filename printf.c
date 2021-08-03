@@ -133,7 +133,10 @@ typedef uint8_t numeric_base_t;
 #include <float.h>
 #endif
 
-#define ABS(_x) ( (_x)>0 ? (NTOA_VALUE_TYPE)(_x) : -(NTOA_VALUE_TYPE)(_x))
+// Note in particular the behavior here on LONG_MIN or LLONG_MIN; it is valid
+// and well-defined, but if you're not careful you can easily trigger undefined
+// behavior with -LONG_MIN or -LLONG_MIN
+#define NTOA_ABS(_x) ( (_x) > 0 ? (NTOA_VALUE_TYPE)(_x) : -((NTOA_VALUE_TYPE)_x) )
 
 // output function type
 typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);
@@ -344,6 +347,9 @@ static size_t _ntoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, N
 
 #if PRINTF_SUPPORT_FLOAT_SPECIFIERS
 
+// Note: This assumes _x is a _number - not NaN nor +/- infinity
+#define SIGN_OF_DOUBLE_NUMBER(_x) (*(const uint64_t *)(&(_x)) >> 63U)
+
 #if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 // forward declaration so that _ftoa can switch to exp notation for values > PRINTF_FLOAT_NOTATION_THRESHOLD
 static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, double value, unsigned int precision, unsigned int width, unsigned int flags);
@@ -378,11 +384,11 @@ static size_t _ftoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
 #endif
   }
 
-  // test for negative
-  const bool negative = signbit(value);
+  bool negative = SIGN_OF_DOUBLE_NUMBER(value);
   if (negative) {
     value = -value;
   }
+
 
   // set default precision, if not set explicitly
   if (!(flags & FLAGS_PRECISION)) {
@@ -506,8 +512,7 @@ static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
     return _ftoa(out, buffer, idx, maxlen, value, precision, width, flags);
   }
 
-  // determine the sign
-  const bool negative = signbit(value);
+  const bool negative = SIGN_OF_DOUBLE_NUMBER(value);
   if (negative) {
     value = -value;
   }
@@ -517,19 +522,20 @@ static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
     precision = PRINTF_DEFAULT_FLOAT_PRECISION;
   }
 
-  // determine the decimal exponent
-  // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
+  int expval;
   union {
     uint64_t U;
     double   F;
   } conv;
-
   conv.F = value;
-  int expval;
-  if(value == 0.0)
+
+  if (value == 0.0) {
+    // TODO: This is a special-case for 0.0 (and -0.0); but proper handling is required for denormals more generally.
     expval = 0;
-  else
-  {
+  }
+  else  {
+    // determine the decimal exponent
+    // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
     int exp2 = (int)((conv.U >> 52U) & 0x07FFU) - 1023;           // effectively log2
     conv.U = (conv.U & ((1ULL << 52U) - 1U)) | (1023ULL << 52U);  // drop the exponent so conv.F is now in [1,2)
     // now approximate log10 from the log2 integer part and an expansion of ln around 1.5
@@ -603,7 +609,7 @@ static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
     out((flags & FLAGS_UPPERCASE) ? 'E' : 'e', buffer, idx++, maxlen);
     // output the exponent value
     idx = _ntoa(out, buffer, idx, maxlen,
-                (NTOA_VALUE_TYPE) ABS(expval),
+                NTOA_ABS(expval),
                 expval < 0, 10, 0, minwidth-1,
                 FLAGS_ZEROPAD | FLAGS_PLUS);
     // might need to right-pad spaces
@@ -768,16 +774,16 @@ static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const
           if (flags & FLAGS_LONG_LONG) {
 #if PRINTF_SUPPORT_LONG_LONG
             const long long value = va_arg(va, long long);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, NTOA_ABS(value), value < 0, base, precision, width, flags);
 #endif
           }
           else if (flags & FLAGS_LONG) {
             const long value = va_arg(va, long);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, NTOA_ABS(value), value < 0, base, precision, width, flags);
           }
           else {
             const int value = (flags & FLAGS_CHAR) ? (signed char)va_arg(va, int) : (flags & FLAGS_SHORT) ? (short int)va_arg(va, int) : va_arg(va, int);
-            idx = _ntoa(out, buffer, idx, maxlen, (NTOA_VALUE_TYPE) ABS(value), value < 0, base, precision, width, flags);
+            idx = _ntoa(out, buffer, idx, maxlen, NTOA_ABS(value), value < 0, base, precision, width, flags);
           }
         }
         else {
