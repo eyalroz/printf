@@ -1,12 +1,15 @@
 
-	#include <stdlib.h>
-	#include <stdio.h>
-	#include <string.h>
-	#include <stdbool.h>
-	#include <stdint.h>
-	#include <getopt.h>
-  #include <math.h>
-  #include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <getopt.h>
+#include <math.h>
+#include <assert.h>
+
+#undef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
+#include "../printf.h"
 
 //*******************************************************
 // Defines
@@ -20,8 +23,6 @@
 // range for float testing
   #define FLOAT_TST_MIN 1E-5
   #define FLOAT_TST_MAX 1E5
-
-  #define FLOAT_PREC_MAX 8
 
 	struct cmdopt_struct 
 	{
@@ -98,15 +99,7 @@ Examples:\n\
 // Functions
 //*******************************************************
 
-#undef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
-namespace test {
-  // use functions in own test namespace to avoid stdio conflicts
-  #include "../printf.h"
-  #include "../printf.c"
-} // namespace test
-
-
-void test::_putchar(char character)
+void _putchar(char character)
 {
   (void)character;
 }
@@ -252,7 +245,7 @@ static void test_i(void)
 		value*=-1;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -300,7 +293,7 @@ static void test_x(void)
 		value = 0;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -348,7 +341,7 @@ static void test_o(void)
 		value = 0;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -394,7 +387,7 @@ static void test_u(void)
 		value = 0;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -437,7 +430,7 @@ static void test_f(void)
 	if(rand()&1 && opts.prec)
 	{
 		strcat(fmt_buf, ".");
-		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%FLOAT_PREC_MAX);
+		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%width);
 	};
 
 	strcat(fmt_buf, "f");
@@ -451,7 +444,7 @@ static void test_f(void)
 		value*=-1;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -494,7 +487,7 @@ static void test_e(void)
 	if(rand()&1 && opts.prec)
 	{
 		strcat(fmt_buf, ".");
-		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%FLOAT_PREC_MAX);
+		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%width);
 	};
 
 	strcat(fmt_buf, "e");
@@ -508,7 +501,7 @@ static void test_e(void)
 		value*=-1;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;
@@ -551,7 +544,7 @@ static void test_g(void)
 	if(rand()&1 && opts.prec)
 	{
 		strcat(fmt_buf, ".");
-		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%FLOAT_PREC_MAX);
+		sprintf(&fmt_buf[strlen(fmt_buf)], "%i", 1+rand()%width);
 	};
 
 	strcat(fmt_buf, "g");
@@ -565,7 +558,7 @@ static void test_g(void)
 		value*=-1;
 	
 	sprintf(std_buf, fmt_buf, value);
-	test::sprintf_(tst_buf, fmt_buf, value);
+	sprintf_(tst_buf, fmt_buf, value);
 	
 	if(strcmp(std_buf,tst_buf))
     dst = stderr;

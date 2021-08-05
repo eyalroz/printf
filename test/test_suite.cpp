@@ -770,7 +770,7 @@ TEST_CASE("float", "[]" ) {
 
   CAPTURE_AND_PRINT(test::sprintf_, buffer, "%.0f", (double) ((int64_t)1 * 1000 * 1000 * 1000 * 1000) );
   if (PRINTF_FLOAT_NOTATION_THRESHOLD < 10e+11) {
-    CHECK(!strcmp(buffer, "10e+11"));
+    CHECK(!strcmp(buffer, "1e+12"));
   }
   else {
     CHECK(!strcmp(buffer, "1000000000000"));
@@ -778,7 +778,7 @@ TEST_CASE("float", "[]" ) {
 
   CAPTURE_AND_PRINT(test::sprintf_, buffer, "%.0f", (double) ((int64_t)1 * 1000 * 1000 * 1000 * 1000 * 1000) );
   if (PRINTF_FLOAT_NOTATION_THRESHOLD < 10e+14) {
-    CHECK(!strcmp(buffer, "10e+14"));
+    CHECK(!strcmp(buffer, "1e+15"));
   }
   else {
     CHECK(!strcmp(buffer, "1000000000000000"));
@@ -793,11 +793,11 @@ TEST_CASE("float", "[]" ) {
 
   // this testcase checks, that the precision is truncated to 9 digits.
   // a perfect working float should return the whole number
-  PRINTING_CHECK("42.895223123000",  ==, test::sprintf_, buffer, "%.12f", 42.89522312345678);
+  PRINTING_CHECK("42.895223123457",  ==, test::sprintf_, buffer, "%.12f", 42.89522312345678);
 
   // this testcase checks, that the precision is truncated AND rounded to 9 digits.
   // a perfect working float should return the whole number
-  PRINTING_CHECK("42.895223877000",  ==, test::sprintf_, buffer, "%.12f", 42.89522387654321);
+  PRINTING_CHECK("42.895223876543",  ==, test::sprintf_, buffer, "%.12f", 42.89522387654321);
   PRINTING_CHECK(" 42.90",           ==, test::sprintf_, buffer, "%6.2f", 42.8952);
   PRINTING_CHECK("+42.90",           ==, test::sprintf_, buffer, "%+6.2f", 42.8952);
   PRINTING_CHECK("+42.9",            ==, test::sprintf_, buffer, "%+5.1f", 42.9252);
@@ -826,6 +826,7 @@ TEST_CASE("float", "[]" ) {
   PRINTING_CHECK("+001.234e-05",     ==, test::sprintf_, buffer, "%+012.4g", 0.00001234);
   PRINTING_CHECK("-1.23e-308",       ==, test::sprintf_, buffer, "%.3g", -1.2345e-308);
   PRINTING_CHECK("+1.230E+308",      ==, test::sprintf_, buffer, "%+.3E", 1.23e+308);
+  PRINTING_CHECK("1.000e+01",        ==, test::sprintf_, buffer, "%.3e", 9.9996);
 #endif
 
   // out of range for float: should switch to exp notation if supported, else empty
@@ -1061,6 +1062,9 @@ TEST_CASE("extremal signed integer values", "[]" ) {
   char buffer[100];
   char expected[100];
 
+  std::sprintf(expected, "%hhd", std::numeric_limits<char>::max());
+  PRINTING_CHECK(expected, ==, test::sprintf_, buffer, "%hhd", std::numeric_limits<char>::max());
+
   std::sprintf(expected, "%hd", std::numeric_limits<short int>::max());
   PRINTING_CHECK(expected, ==, test::sprintf_, buffer, "%hd", std::numeric_limits<short int>::max());
 
@@ -1089,6 +1093,9 @@ TEST_CASE("extremal signed integer values", "[]" ) {
 TEST_CASE("extremal unsigned integer values", "[]" ) {
   char buffer[100];
   char expected[100];
+
+  std::sprintf(expected, "%hhu", std::numeric_limits<char unsigned>::max());
+  PRINTING_CHECK(expected, ==, test::sprintf_, buffer, "%hhu", std::numeric_limits<char unsigned>::max());
 
   std::sprintf(expected, "%hu", std::numeric_limits<short unsigned>::max());
   PRINTING_CHECK(expected, ==, test::sprintf_, buffer, "%hu", std::numeric_limits<short unsigned>::max());
