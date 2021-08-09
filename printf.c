@@ -140,6 +140,8 @@ typedef uint8_t numeric_base_t;
 // behavior with -LONG_MIN or -LLONG_MIN
 #define NTOA_ABS(_x) ( (_x) > 0 ? (NTOA_VALUE_TYPE)(_x) : -((NTOA_VALUE_TYPE)_x) )
 
+#define PRINTF_ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
+
 // output function type
 typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);
 
@@ -359,7 +361,7 @@ struct double_components {
 
 #define NUM_DECIMAL_DIGITS_IN_INT64_T 18U
 #define PRINTF_MAX_SUPPORTED_PRECISION NUM_DECIMAL_DIGITS_IN_INT64_T - 1
-static const double pow10[NUM_DECIMAL_DIGITS_IN_INT64_T] = {
+static const double powers_of_10[NUM_DECIMAL_DIGITS_IN_INT64_T] = {
   1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08,
   1e09, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
 };
@@ -373,7 +375,7 @@ static struct double_components get_components(double number, unsigned int preci
   number_.is_negative = SIGN_OF_DOUBLE_NUMBER(number);
   double abs_number = (number_.is_negative) ? -number : number;
   number_.integral = (int_fast64_t)abs_number;
-  double tmp = (abs_number - number_.integral) * pow10[precision];
+  double tmp = (abs_number - number_.integral) * powers_of_10[precision];
   number_.fractional = (int_fast64_t)tmp;
 
   double diff = tmp - (double) number_.fractional;
@@ -381,7 +383,7 @@ static struct double_components get_components(double number, unsigned int preci
   if (diff > 0.5) {
     ++number_.fractional;
     // handle rollover, e.g. case 0.99 with precision 1 is 1.0
-    if ((double) number_.fractional >= pow10[precision]) {
+    if ((double) number_.fractional >= powers_of_10[precision]) {
       number_.fractional = 0;
       ++number_.integral;
     }
@@ -506,18 +508,21 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
   double abs_number =  negative ? -number : number;
 
   int exp10;
-  union {
-    uint64_t U;
-    double   F;
-  } conv;
-  conv.F = abs_number;
+  bool abs_exp10_covered_by_powers_table;
+  double normalization_factor; // equal, or almost equal, to either 10 ^ (|exp10|) or 10 ^ (|exp10|)
 
   // Determine the decimal exponent
   if (abs_number == 0.0) {
     // TODO: This is a special-case for 0.0 (and -0.0); but proper handling is required for denormals more generally.
-    exp10 = 0;
+    exp10 = 0; // ... and no need to set a normalization factor or check the powers table
   }
   else  {
+    union {
+      uint64_t U;
+      double   F;
+    } conv;
+    conv.F = abs_number;
+
     // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
     int exp2 = (int)((conv.U >> 52U) & 0x07FFU) - 1023;           // effectively log2
     conv.U = (conv.U & ((1ULL << 52U) - 1U)) | (1023ULL << 52U);  // drop the exp10 so conv.F is now in [1,2)
@@ -535,6 +540,11 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
       exp10--;
       conv.F /= 10;
     }
+    abs_exp10_covered_by_powers_table = PRINTF_ABS(exp10) < NUM_DECIMAL_DIGITS_IN_INT64_T;
+    normalization_factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(exp10)] : conv.F;
+      // So, note that the normalization factor may need multiplication or division,
+      // depending on the circumstances. This is a bit fugly, but if we forced it to be
+      // multiplication-only or division-only we would have lost a bit of accuracy
   }
 
   // TODO: Do we need to check for normalized_number_components.integral being 0, and correct in the opposite direction?
@@ -561,13 +571,10 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
     flags |= FLAGS_PRECISION;   // make sure sprint_broken_up_decimal respects our choice above
   }
 
-  double normalized_abs_number = (!fall_back_to_decimal_only_mode && exp10) ?
-    (exp10 >= (int) NUM_DECIMAL_DIGITS_IN_INT64_T || -exp10 >= (int) NUM_DECIMAL_DIGITS_IN_INT64_T) ?
-    abs_number / conv.F :
-    exp10 > 0 ?
-      abs_number / pow10[exp10] :
-      abs_number * pow10[-exp10] :
-    abs_number;
+  bool normalization_is_necessary = (fall_back_to_decimal_only_mode || exp10 == 0);
+  double normalized_abs_number = normalization_is_necessary ? abs_number :
+    (exp10 < 0 && abs_exp10_covered_by_powers_table) ?
+    abs_number * normalization_factor : abs_number / normalization_factor;
 
   struct double_components normalized_number_components = get_components(negative ? -normalized_abs_number : normalized_abs_number, precision);
 
