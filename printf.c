@@ -499,6 +499,15 @@ static size_t sprint_decimal_number(out_fct_type out, char* buffer, size_t idx, 
   return sprint_broken_up_decimal(value_, out, buffer, idx, maxlen, precision, width, flags, buf, len);
 }
 
+struct normalization {
+  double factor;
+  bool multiply; // if true, need to multiply by factor; otherwise need to divide by it
+};
+
+double normalize(double num, struct normalization normalization)
+{
+  return normalization.multiply ? num * normalization.factor : num / normalization.factor;
+}
 
 #if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 // internal ftoa variant for exponential floating-point type, contributed by Martijn Jasperse <m.jasperse@gmail.com>
@@ -510,7 +519,8 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
 
   int exp10;
   bool abs_exp10_covered_by_powers_table;
-  double normalization_factor; // equal, or almost equal, to either 10 ^ (|exp10|) or 10 ^ (|exp10|)
+  struct normalization normalization; // factor will be either 10 ^ (-|exp10|) or 10 ^ (|exp10|)
+
 
   // Determine the decimal exponent
   if (abs_number == 0.0) {
@@ -542,13 +552,13 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
       conv.F /= 10;
     }
     abs_exp10_covered_by_powers_table = PRINTF_ABS(exp10) < NUM_DECIMAL_DIGITS_IN_INT64_T;
-    normalization_factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(exp10)] : conv.F;
+    normalization.factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(exp10)] : conv.F;
       // So, note that the normalization factor may need multiplication or division,
       // depending on the circumstances. This is a bit fugly, but if we forced it to be
       // multiplication-only or division-only we would have lost a bit of accuracy
   }
 
-  // TODO: Do we need to check for normalized_number_components.integral being 0, and correct in the opposite direction?
+  // TODO: Do we need to check for decimal_part_components.integral being 0, and correct in the opposite direction?
 
   // We now begin accounting for the widths of the two parts of our printed field:
   // the decimal part after decimal exponent extraction, and the base-10 exponent part.
@@ -572,21 +582,21 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
     flags |= FLAGS_PRECISION;   // make sure sprint_broken_up_decimal respects our choice above
   }
 
-  bool normalization_is_necessary = (fall_back_to_decimal_only_mode || exp10 == 0);
-  double normalized_abs_number = normalization_is_necessary ? abs_number :
-    (exp10 < 0 && abs_exp10_covered_by_powers_table) ?
-    abs_number * normalization_factor : abs_number / normalization_factor;
+  bool should_skip_normalization = (fall_back_to_decimal_only_mode || exp10 == 0);
+  normalization.multiply = (exp10 < 0 && abs_exp10_covered_by_powers_table);
+  double normalized_abs_number = should_skip_normalization ? abs_number :
+                                 normalize(abs_number, normalization);
 
-  struct double_components normalized_number_components = get_components(negative ? -normalized_abs_number : normalized_abs_number, precision);
+  struct double_components decimal_part_components = get_components(negative ? -normalized_abs_number : normalized_abs_number, precision);
 
   if (!fall_back_to_decimal_only_mode) {
     // The rounding due to the breakup into components has the potential to add or decrease the number's exponent,
     // e.g. from 9.999something to 10 - in which case we must "steal" this extra 10 in favor of the exponent
-    if (normalized_number_components.integral >= 10) {
+    if (decimal_part_components.integral >= 10) {
       exp10++;
       normalized_abs_number /= 10;
-      normalized_number_components.integral = 1;
-      normalized_number_components.fractional = 0;
+      decimal_part_components.integral = 1;
+      decimal_part_components.fractional = 0;
     }
     // Note: We don't perform this check for the fallback-to-decimal-only mode.
     // If we were to perform it, we may have needed to reconsider the fallback decision.
@@ -612,7 +622,7 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
         0U);
 
   const size_t start_idx = idx;
-  idx = sprint_broken_up_decimal(normalized_number_components, out, buffer, idx, maxlen, precision, decimal_part_width, flags, buf, len);
+  idx = sprint_broken_up_decimal(decimal_part_components, out, buffer, idx, maxlen, precision, decimal_part_width, flags, buf, len);
 
   if (! fall_back_to_decimal_only_mode) {
     out((flags & FLAGS_UPPERCASE) ? 'E' : 'e', buffer, idx++, maxlen);
