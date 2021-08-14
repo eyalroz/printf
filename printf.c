@@ -679,16 +679,22 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
     get_components(negative ? -abs_number : abs_number, precision) :
     get_normalized_components(negative, precision, abs_number, normalization);
 
-  if (!fall_back_to_decimal_only_mode) {
-    // The rounding due to the breakup into components has the potential to add or decrease the number's exponent,
-    // e.g. from 9.999something to 10 - in which case we must "steal" this extra 10 in favor of the exponent
+  // Account for roll-over, e.g. rounding from 9.99 to 100.0 - which effects
+  // the exponent and may require additional tweaking of the parts
+  if (fall_back_to_decimal_only_mode) {
+    if ( (flags & FLAGS_ADAPT_EXP) && exp10 >= -1 && decimal_part_components.integral == powers_of_10[exp10 + 1]) {
+      exp10++; // Not strictly necessary, since exp10 is no longer really used
+      precision--;
+      // ... and it should already be the case that decimal_part_components.fractional == 0
+    }
+    // TODO: What about rollover strictly within the fractional part?
+  }
+  else {
     if (decimal_part_components.integral >= 10) {
       exp10++;
       decimal_part_components.integral = 1;
       decimal_part_components.fractional = 0;
     }
-    // Note: We don't perform this check for the fallback-to-decimal-only mode.
-    // If we were to perform it, we may have needed to reconsider the fallback decision.
   }
 
   // the exp10 format is "E%+03d" and largest number is "307", so set aside 4-5 characters
