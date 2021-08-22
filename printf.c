@@ -1,34 +1,40 @@
-///////////////////////////////////////////////////////////////////////////////
-// \author (c) Marco Paland (info@paland.com)
-//             2014-2019, PALANDesign Hannover, Germany
-//
-// \license The MIT License (MIT)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// \brief Tiny printf, sprintf and (v)snprintf implementation, optimized for speed on
-//        embedded systems with a very limited resources. These routines are thread
-//        safe and reentrant!
-//        Use this instead of the bloated standard/newlib printf cause these use
-//        malloc for printf (and may not be thread safe).
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @author (c) Eyal Rozenberg <eyalroz1@gmx.com>
+ *             2021, Haifa, Palestine/Israel
+ * @author (c) Marco Paland (info@paland.com)
+ *             2014-2019, PALANDesign Hannover, Germany
+ *
+ * @note Others have made smaller contributions to this file: see the
+ * contributors page at https://github.com/eyalroz/printf/graphs/contributors
+ * or ask one of the authors.
+ *
+ * @brief Small stand-alone implementation of the printf family of functions
+ * (`(v)printf`, `(v)s(n)printf` etc., geared towards use on embedded systems with
+ * a very limited resources.
+ *
+ * @note the implementations are thread-safe; re-entrant; use no functions from
+ * the standard library; and do not dynamically allocate any memory.
+ *
+ * @license The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,13 +53,13 @@
 // 'ntoa' conversion buffer size, this must be big enough to hold one converted
 // numeric number including padded zeros (dynamically created on stack)
 #ifndef PRINTF_NTOA_BUFFER_SIZE
-#define PRINTF_NTOA_BUFFER_SIZE    32U
+#define PRINTF_NTOA_BUFFER_SIZE    32
 #endif
 
 // 'ftoa' conversion buffer size, this must be big enough to hold one converted
 // float number including padded zeros (dynamically created on stack)
 #ifndef PRINTF_FTOA_BUFFER_SIZE
-#define PRINTF_FTOA_BUFFER_SIZE    32U
+#define PRINTF_FTOA_BUFFER_SIZE    32
 #endif
 
 // Support for the decimal notation floating point conversion specifiers (%f, %F)
@@ -68,7 +74,7 @@
 
 // Default precision for the floating point conversion specifiers (the C standard sets this at 6)
 #ifndef PRINTF_DEFAULT_FLOAT_PRECISION
-#define PRINTF_DEFAULT_FLOAT_PRECISION  6U
+#define PRINTF_DEFAULT_FLOAT_PRECISION  6
 #endif
 
 // According to the C languages standard, printf() and related functions must be able to print any
@@ -221,7 +227,7 @@ static inline void _out_fct(char character, void* buffer, size_t idx, size_t max
 
 
 // internal secure strlen
-// \return The length of the string (excluding the terminating 0) limited by 'maxsize'
+// @return The length of the string (excluding the terminating 0) limited by 'maxsize'
 static inline unsigned int _strnlen_s(const char* str, size_t maxsize)
 {
   const char* s;
@@ -231,7 +237,7 @@ static inline unsigned int _strnlen_s(const char* str, size_t maxsize)
 
 
 // internal test if char is a digit (0-9)
-// \return true if char is a digit
+// @return true if char is a digit
 static inline bool _is_digit(char ch)
 {
   return (ch >= '0') && (ch <= '9');
@@ -386,7 +392,7 @@ struct double_components {
   bool is_negative;
 };
 
-#define NUM_DECIMAL_DIGITS_IN_INT64_T 18U
+#define NUM_DECIMAL_DIGITS_IN_INT64_T 18
 #define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  NUM_DECIMAL_DIGITS_IN_INT64_T
 static const double powers_of_10[NUM_DECIMAL_DIGITS_IN_INT64_T] = {
   1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08,
@@ -436,71 +442,70 @@ static struct double_components get_components(double number, unsigned int preci
   return number_;
 }
 
-struct normalization {
-  double factor;
-  bool multiply; // if true, need to multiply by factor; otherwise need to divide by it
+struct scaling_factor {
+  double raw_factor;
+  bool multiply; // if true, need to multiply by raw_factor; otherwise need to divide by it
 };
 
-double normalize(double num, struct normalization normalization)
+double apply_scaling(double num, struct scaling_factor normalization)
 {
-  return normalization.multiply ? num * normalization.factor : num / normalization.factor;
+  return normalization.multiply ? num * normalization.raw_factor : num / normalization.raw_factor;
 }
 
-double unnormalize(double normalized, struct normalization normalization)
+double unapply_scaling(double normalized, struct scaling_factor normalization)
 {
-  return normalization.multiply ? normalized / normalization.factor : normalized * normalization.factor;
+  return normalization.multiply ? normalized / normalization.raw_factor : normalized * normalization.raw_factor;
 }
 
-struct normalization update_normalization(struct normalization n, double extra_multiplicative_factor)
+struct scaling_factor update_normalization(struct scaling_factor sf, double extra_multiplicative_factor)
 {
-  struct normalization result;
-  if (n.multiply) {
+  struct scaling_factor result;
+  if (sf.multiply) {
     result.multiply = true;
-    result.factor = n.factor * extra_multiplicative_factor;
+    result.raw_factor = sf.raw_factor * extra_multiplicative_factor;
   }
   else {
-    int factor_exp2 = get_exp2(get_bit_access(n.factor));
+    int factor_exp2 = get_exp2(get_bit_access(sf.raw_factor));
     int extra_factor_exp2 = get_exp2(get_bit_access(extra_multiplicative_factor));
 
-    // Divide the larger-exponent raw factor by the smaller
+    // Divide the larger-exponent raw raw_factor by the smaller
     if (PRINTF_ABS(factor_exp2) > PRINTF_ABS(extra_factor_exp2)) {
       result.multiply = false;
-      result.factor = n.factor / extra_multiplicative_factor;
+      result.raw_factor = sf.raw_factor / extra_multiplicative_factor;
     }
     else {
       result.multiply = true;
-      result.factor = extra_multiplicative_factor / n.factor;
+      result.raw_factor = extra_multiplicative_factor / sf.raw_factor;
     }
   }
   return result;
 }
 
-static struct double_components get_normalized_components(bool negative, unsigned int precision, double non_normalized, struct normalization account_for_exponent_part)
+static struct double_components get_normalized_components(bool negative, unsigned int precision, double non_normalized, struct scaling_factor normalization)
 {
   struct double_components components;
   components.is_negative = negative;
-  components.integral = (int_fast64_t) normalize(non_normalized, account_for_exponent_part);
-  double remainder = non_normalized - unnormalize(components.integral, account_for_exponent_part);
+  components.integral = (int_fast64_t) apply_scaling(non_normalized, normalization);
+  double remainder = non_normalized - unapply_scaling(components.integral, normalization);
   double prec_power_of_10 = powers_of_10[precision];
-  struct normalization account_for_precision = update_normalization(account_for_exponent_part, prec_power_of_10);
-  double normalized_remainder = normalize(remainder, account_for_precision);
+  struct scaling_factor account_for_precision = update_normalization(normalization, prec_power_of_10);
+  double scaled_remainder = apply_scaling(remainder, account_for_precision);
   double rounding_threshold = 0.5;
 
   if (precision == 0U) {
     components.fractional = 0;
-    components.integral += (normalized_remainder >= rounding_threshold);
-    if (normalized_remainder == rounding_threshold) {
+    components.integral += (scaled_remainder >= rounding_threshold);
+    if (scaled_remainder == rounding_threshold) {
       // banker's rounding: Round towards the even number (making the mean error 0)
       components.integral &= ~((int_fast64_t) 0x1);
     }
   }
   else {
-    // TODO: We currently do not assume that the normalization is by a perfect power of 10.
-    components.fractional = (int_fast64_t) normalized_remainder;
-    normalized_remainder -= components.fractional;
+    components.fractional = (int_fast64_t) scaled_remainder;
+    scaled_remainder -= components.fractional;
 
-    components.fractional += (normalized_remainder >= rounding_threshold);
-    if (normalized_remainder == rounding_threshold) {
+    components.fractional += (scaled_remainder >= rounding_threshold);
+    if (scaled_remainder == rounding_threshold) {
       // banker's rounding: Round towards the even number (making the mean error 0)
       components.fractional &= ~((int_fast64_t) 0x1);
     }
@@ -617,7 +622,7 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
 
   int exp10;
   bool abs_exp10_covered_by_powers_table;
-  struct normalization normalization; // factor will be either 10 ^ (-|exp10|) or 10 ^ (|exp10|)
+  struct scaling_factor normalization;
 
 
   // Determine the decimal exponent
@@ -647,7 +652,7 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
       }
     }
     abs_exp10_covered_by_powers_table = PRINTF_ABS(exp10) < PRINTF_MAX_PRECOMPUTED_POWER_OF_10;
-    normalization.factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(exp10)] : conv.F;
+    normalization.raw_factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(exp10)] : conv.F;
   }
 
   // We now begin accounting for the widths of the two parts of our printed field:
@@ -748,7 +753,7 @@ static size_t sprint_floating_point(out_fct_type out, char* buffer, size_t idx, 
   if (value > DBL_MAX)
     return _out_rev(out, buffer, idx, maxlen, (flags & FLAGS_PLUS) ? "fni+" : "fni", (flags & FLAGS_PLUS) ? 4U : 3U, width, flags);
 
-  if (! prefer_exponential && (value > PRINTF_FLOAT_NOTATION_THRESHOLD) || (value < -PRINTF_FLOAT_NOTATION_THRESHOLD)) {
+  if (!prefer_exponential && ((value > PRINTF_FLOAT_NOTATION_THRESHOLD) || (value < -PRINTF_FLOAT_NOTATION_THRESHOLD))) {
     // The required behavior of standard printf is to print _every_ integral-part digit -- which could mean
     // printing hundreds of characters, overflowing any fixed internal buffer and necessitating a more complicated
     // implementation.
