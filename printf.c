@@ -133,6 +133,9 @@ typedef uint8_t numeric_base_t;
 // import float.h for DBL_MAX
 #if (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 #include <float.h>
+#if DBL_MANT_DIG == 24
+  #define SIZE_OF_DBL_32
+#endif
 #endif
 
 // Note in particular the behavior here on LONG_MIN or LLONG_MIN; it is valid
@@ -143,7 +146,11 @@ typedef uint8_t numeric_base_t;
 #define PRINTF_ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
 
 typedef union {
-  uint64_t U;
+#ifdef SIZE_OF_DBL_32
+	uint32_t U;
+#else
+	uint64_t U;
+#endif
   double   F;
 } double_with_bit_access;
 
@@ -160,7 +167,11 @@ static inline double_with_bit_access get_bit_access(double x)
 static inline int get_sign(double x)
 {
   // The sign is in the highest bit, bit 63
-  return get_bit_access(x).U >> 63U;
+	#ifdef SIZE_OF_DBL_32
+	return get_bit_access(x).U >> 31U;
+	#else
+	return get_bit_access(x).U >> 63U;
+	#endif
 }
 
 static inline int get_exp2(double_with_bit_access x)
@@ -168,7 +179,11 @@ static inline int get_exp2(double_with_bit_access x)
   // The exponent is in bits 52...62 inclusive, but the exponent is signed, not unsigned.
   // Also, it's not signed like regular signed integers: The range is mapped to -1023..1024
   // (and -1023 and 1024 are reserved for special use, but we ignore that here).
-  return (int)((x.U >> 52U) & 0x07FFU) - 1023;
+	#ifdef SIZE_OF_DBL_32
+	return (int)((x.U >> 23U) & 0x00FFU) - 127;
+	#else
+	return (int)((x.U >> 52U) & 0x07FFU) - 1023;
+	#endif
 }
 
 
@@ -629,14 +644,22 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
     {
       // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
       int exp2 = get_exp2(conv);
-      conv.U = (conv.U & ((1ULL << 52U) - 1U)) | (1023ULL << 52U);  // drop the exp10 so conv.F is now in [1,2)
+      #ifdef SIZE_OF_DBL_32
+			conv.U = (conv.U & ((1UL << 23U) - 1U)) | (127UL << 23U);  // drop the exp10 so conv.F is now in [1,2)
+			#else
+			conv.U = (conv.U & ((1ULL << 52U) - 1U)) | (1023ULL << 52U);  // drop the exp10 so conv.F is now in [1,2)
+			#endif
       // now approximate log10 from the log2 integer part and an expansion of ln around 1.5
       exp10 = (int)(0.1760912590558 + exp2 * 0.301029995663981 + (conv.F - 1.5) * 0.289529654602168);
       // now we want to compute 10^exp10 but we want to be sure it won't overflow
       exp2 = (int)(exp10 * 3.321928094887362 + 0.5);
       const double z  = exp10 * 2.302585092994046 - exp2 * 0.6931471805599453;
       const double z2 = z * z;
-      conv.U = (uint64_t)(exp2 + 1023) << 52U;
+			#ifdef SIZE_OF_DBL_32
+			conv.U = (uint32_t)(exp2 + 127) << 23U;
+			#else
+			conv.U = (uint64_t)(exp2 + 1023) << 52U;
+			#endif
       // compute exp(z) using continued fractions, see https://en.wikipedia.org/wiki/Exponential_function#Continued_fractions_for_ex
       conv.F *= 1 + 2 * z / (2 - z + (z2 / (6 + (z2 / (10 + z2 / 14)))));
       // correct for rounding errors
