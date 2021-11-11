@@ -71,9 +71,9 @@ The CMake options and preprocessor definitions have the same name.
 
 CMake-only options:
 
-| Option                | Default value | Description |
-|-----------------------|---------------|-------------|
-| BUILD_STATIC_LIBRARY  | No            | Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build)|
+| Option                       | Default value | Description |
+|------------------------------|---------------|-------------|
+| PRINTF_BUILD_STATIC_LIBRARY  | No            | Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build)|
 
 Note: The preprocessor definitions are taken into account when compiling `printf.c`, _not_ when using the compiled library by including `printf.h`.
 
