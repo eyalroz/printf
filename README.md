@@ -69,9 +69,11 @@ The CMake options and preprocessor definitions have the same name.
 | PRINTF_SUPPORT_LONG_LONG               | Yes           | Support long long integral types (allows for the ll length modifier and affects %p) |
 | PRINTF_SUPPORT_PTRDIFF_LENGTH_MODIFIER | Yes           | Support the pointer difference specifier (%t), used for `ptrdiff_t` variables" |
 
-CMake only options:
+CMake-only options:
 
-| BUILD_STATIC_LIBRARY            | (none)                                 | No            | Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build)|
+| Option                | Default value | Description |
+|-----------------------|---------------|-------------|
+| BUILD_STATIC_LIBRARY  | No            | Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build)|
 
 Note: The preprocessor definitions are taken into account when compiling `printf.c`, _not_ when using the compiled library by including `printf.h`.
 
