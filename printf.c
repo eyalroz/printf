@@ -52,14 +52,14 @@
 
 // 'ntoa' conversion buffer size, this must be big enough to hold one converted
 // numeric number including padded zeros (dynamically created on stack)
-#ifndef PRINT_INTEGER_BUFFER_SIZE
-#define PRINT_INTEGER_BUFFER_SIZE    32
+#ifndef PRINTF_NTOA_INTEGER_BUFFER_SIZE
+#define PRINTF_NTOA_INTEGER_BUFFER_SIZE    32
 #endif
 
 // 'ftoa' conversion buffer size, this must be big enough to hold one converted
 // float number including padded zeros (dynamically created on stack)
-#ifndef PRINTF_FTOA_BUFFER_SIZE
-#define PRINTF_FTOA_BUFFER_SIZE    32
+#ifndef PRINTF_FTOA_DECIMAL_BUFFER_SIZE
+#define PRINTF_FTOA_DECIMAL_BUFFER_SIZE    32
 #endif
 
 // Support for the decimal notation floating point conversion specifiers (%f, %F)
@@ -312,12 +312,12 @@ static size_t print_integer_finalization(out_fct_type out, char* buffer, size_t 
       if (width && (flags & FLAGS_ZEROPAD) && (negative || (flags & (FLAGS_PLUS | FLAGS_SPACE)))) {
         width--;
       }
-      while ((flags & FLAGS_ZEROPAD) && (len < width) && (len < PRINT_INTEGER_BUFFER_SIZE)) {
+      while ((flags & FLAGS_ZEROPAD) && (len < width) && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE)) {
         buf[len++] = '0';
       }
     }
 
-    while ((len < precision) && (len < PRINT_INTEGER_BUFFER_SIZE)) {
+    while ((len < precision) && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE)) {
       buf[len++] = '0';
     }
 
@@ -341,21 +341,21 @@ static size_t print_integer_finalization(out_fct_type out, char* buffer, size_t 
         }
       }
     }
-    if ((base == BASE_HEX) && !(flags & FLAGS_UPPERCASE) && (len < PRINT_INTEGER_BUFFER_SIZE)) {
+    if ((base == BASE_HEX) && !(flags & FLAGS_UPPERCASE) && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE)) {
       buf[len++] = 'x';
     }
-    else if ((base == BASE_HEX) && (flags & FLAGS_UPPERCASE) && (len < PRINT_INTEGER_BUFFER_SIZE)) {
+    else if ((base == BASE_HEX) && (flags & FLAGS_UPPERCASE) && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE)) {
       buf[len++] = 'X';
     }
-    else if ((base == BASE_BINARY) && (len < PRINT_INTEGER_BUFFER_SIZE)) {
+    else if ((base == BASE_BINARY) && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE)) {
       buf[len++] = 'b';
     }
-    if (len < PRINT_INTEGER_BUFFER_SIZE) {
+    if (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE) {
       buf[len++] = '0';
     }
   }
 
-  if (len < PRINT_INTEGER_BUFFER_SIZE) {
+  if (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE) {
     if (negative) {
       buf[len++] = '-';
     }
@@ -373,7 +373,7 @@ static size_t print_integer_finalization(out_fct_type out, char* buffer, size_t 
 // An internal itoa-like function
 static size_t print_integer(out_fct_type out, char* buffer, size_t idx, size_t maxlen, printf_unsigned_value_t value, bool negative, numeric_base_t base, unsigned int precision, unsigned int width, unsigned int flags)
 {
-  char buf[PRINT_INTEGER_BUFFER_SIZE];
+  char buf[PRINTF_NTOA_INTEGER_BUFFER_SIZE];
   size_t len = 0U;
 
   if (!value) {
@@ -395,7 +395,7 @@ static size_t print_integer(out_fct_type out, char* buffer, size_t idx, size_t m
       const char digit = (char)(value % base);
       buf[len++] = (char)(digit < 10 ? '0' + digit : (flags & FLAGS_UPPERCASE ? 'A' : 'a') + digit - 10);
       value /= base;
-    } while (value && (len < PRINT_INTEGER_BUFFER_SIZE));
+    } while (value && (len < PRINTF_NTOA_INTEGER_BUFFER_SIZE));
   }
 
   return print_integer_finalization(out, buffer, idx, maxlen, buf, len, negative, base, precision, width, flags);
@@ -565,7 +565,7 @@ static size_t sprint_broken_up_decimal(
     }
 
     if (number_.fractional > 0 || !(flags & FLAGS_ADAPT_EXP) || (flags & FLAGS_HASH) ) {
-      while (len < PRINTF_FTOA_BUFFER_SIZE) {
+      while (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) {
         --count;
         buf[len++] = (char)('0' + number_.fractional % 10U);
         if (!(number_.fractional /= 10U)) {
@@ -573,17 +573,17 @@ static size_t sprint_broken_up_decimal(
         }
       }
       // add extra 0s
-      while ((len < PRINTF_FTOA_BUFFER_SIZE) && (count-- > 0U)) {
+      while ((len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) && (count-- > 0U)) {
         buf[len++] = '0';
       }
-      if (len < PRINTF_FTOA_BUFFER_SIZE) {
+      if (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) {
         buf[len++] = '.';
       }
     }
   }
   else {
     if (flags & FLAGS_HASH) {
-      if (len < PRINTF_FTOA_BUFFER_SIZE) {
+      if (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) {
         buf[len++] = '.';
       }
     }
@@ -591,7 +591,7 @@ static size_t sprint_broken_up_decimal(
 
   // Write the integer part of the number (it comes after the fractional
   // since the character order is reversed)
-  while (len < PRINTF_FTOA_BUFFER_SIZE) {
+  while (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) {
     buf[len++] = (char)('0' + (number_.integral % 10));
     if (!(number_.integral /= 10)) {
       break;
@@ -603,12 +603,12 @@ static size_t sprint_broken_up_decimal(
     if (width && (number_.is_negative || (flags & (FLAGS_PLUS | FLAGS_SPACE)))) {
       width--;
     }
-    while ((len < width) && (len < PRINTF_FTOA_BUFFER_SIZE)) {
+    while ((len < width) && (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE)) {
       buf[len++] = '0';
     }
   }
 
-  if (len < PRINTF_FTOA_BUFFER_SIZE) {
+  if (len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) {
     if (number_.is_negative) {
       buf[len++] = '-';
     }
@@ -761,7 +761,7 @@ static size_t sprint_exponential_number(out_fct_type out, char* buffer, size_t i
 
 static size_t sprint_floating_point(out_fct_type out, char* buffer, size_t idx, size_t maxlen, double value, unsigned int precision, unsigned int width, unsigned int flags, bool prefer_exponential)
 {
-  char buf[PRINTF_FTOA_BUFFER_SIZE];
+  char buf[PRINTF_FTOA_DECIMAL_BUFFER_SIZE];
   size_t len  = 0U;
 
   // test for special values
@@ -789,7 +789,7 @@ static size_t sprint_floating_point(out_fct_type out, char* buffer, size_t idx, 
   }
 
   // limit precision so that our integer holding the fractional part does not overflow
-  while ((len < PRINTF_FTOA_BUFFER_SIZE) && (precision > PRINTF_MAX_SUPPORTED_PRECISION)) {
+  while ((len < PRINTF_FTOA_DECIMAL_BUFFER_SIZE) && (precision > PRINTF_MAX_SUPPORTED_PRECISION)) {
     buf[len++] = '0'; // This respects the precision in terms of result length only
     precision--;
   }

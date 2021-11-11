@@ -54,18 +54,23 @@ If you've started using the library in a publicly-available (FOSS or commercial)
 
 ### CMake options and preprocessor definitions
 
-| CMake option name               | Preprocessor definition                | Default value | Description |
-|---------------------------------|----------------------------------------|---------------|-------------|
-| (always on)                     | PRINTF_INCLUDE_CONFIG_H                | undefined     | Define this as compiler switch (e.g. `gcc -DPRINTF_INCLUDE_CONFIG_H`) to include a "printf_config.h" definition file |
-| ALIAS_STANDARD_FUNCTION_NAMES   | PRINTF_ALIAS_STANDARD_FUNCTION_NAMES   | No            | Alias the standard library function names (`printf()`, `sprintf()` etc.) to the library's functions |
-| NTOA_BUFFER_SIZE                | PRINTF_NTOA_BUFFER_SIZE                | 32            | ntoa (integer) conversion buffer size. This must be big enough to hold one converted numeric number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
-| FTOA_BUFFER_SIZE                | PRINTF_FTOA_BUFFER_SIZE                | 32            | ftoa (float) conversion buffer size. This must be big enough to hold one converted float number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
-| DEFAULT_FLOAT_PRECISION         | PRINTF_DEFAULT_FLOAT_PRECISION         | 6             | Define the default floating point precision|
-| MAX_INTEGRAL_DIGITS_FOR_DECIMAL | PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL | 9             | Maximum number of integral-part digits of a floating-point value for which printing with %f uses decimal (non-exponential) notation |
-| SUPPORT_FLOAT_SPECIFIERS        | PRINTF_SUPPORT_FLOAT_SPECIFIERS        | Yes           | Support decimal notation floating-point conversion specifiers (%f,%F) |
-| SUPPORT_EXPONENTIAL_SPECIFIERS  | PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS  | Yes           | Support exponential floating point format conversion specifiers (%e,%E,%g,%G)" |
-| SUPPORT_LONG_LONG               | PRINTF_SUPPORT_LONG_LONG               | Yes           | Support long long integral types (allows for the ll length modifier and affects %p) |
-| SUPPORT_PTRDIFF_LENGTH_MODIFIER | PRINTF_SUPPORT_PTRDIFF_LENGTH_MODIFIER | Yes           | Support the pointer difference specifier (%t), used for `ptrdiff_t` variables" |
+The CMake options and preprocessor definitions have the same name. 
+
+| Option                                 | Default value | Description |
+|----------------------------------------|---------------|-------------|
+| PRINTF_INCLUDE_CONFIG_H                | ON, when build with CMake, undefined otherwise     | Define this as compiler switch (e.g. `gcc -DPRINTF_INCLUDE_CONFIG_H`) to include a "printf_config.h" definition file |
+| PRINTF_ALIAS_STANDARD_FUNCTION_NAMES   | No            | Alias the standard library function names (`printf()`, `sprintf()` etc.) to the library's functions |
+| PRINTF_NTOA_INTEGER_BUFFER_SIZE        | 32            | ntoa (integer) conversion buffer size. This must be big enough to hold one converted numeric number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
+| PRINTF_FTOA_DECIMAL_BUFFER_SIZE        | 32            | ftoa (float) conversion buffer size. This must be big enough to hold one converted float number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
+| PRINTF_DEFAULT_FLOAT_PRECISION         | 6             | Define the default floating point precision|
+| PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL | 9             | Maximum number of integral-part digits of a floating-point value for which printing with %f uses decimal (non-exponential) notation |
+| PRINTF_SUPPORT_FLOAT_SPECIFIERS        | Yes           | Support decimal notation floating-point conversion specifiers (%f,%F) |
+| PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS  | Yes           | Support exponential floating point format conversion specifiers (%e,%E,%g,%G)" |
+| PRINTF_SUPPORT_LONG_LONG               | Yes           | Support long long integral types (allows for the ll length modifier and affects %p) |
+| PRINTF_SUPPORT_PTRDIFF_LENGTH_MODIFIER | Yes           | Support the pointer difference specifier (%t), used for `ptrdiff_t` variables" |
+
+CMake only options:
+
 | BUILD_STATIC_LIBRARY            | (none)                                 | No            | Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build)|
 
 Note: The preprocessor definitions are taken into account when compiling `printf.c`, _not_ when using the compiled library by including `printf.h`.
