@@ -66,6 +66,12 @@ target_include_directories(
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
 )
 
+# All of the compile-time options (with PRINTF_* prefix), except PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
+# are exposed with the print_config.h header. This one instead is used within the public header file. 
+if(PRINTF_ALIAS_STANDARD_FUNCTION_NAMES)
+    target_compile_definitions(printf PUBLIC PRINTF_ALIAS_STANDARD_FUNCTION_NAMES)
+endif()
+
 set_target_properties(printf PROPERTIES
          LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
          ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
