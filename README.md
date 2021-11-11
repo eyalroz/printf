@@ -39,12 +39,31 @@ The author of this fork was one of the latercomer bug-reporters-and-PR-authors; 
 
 ## Using the `printf` library in your project
 
-There are at least four ways to use this library:
+There are at least five ways to use this library:
 
-1. Use CMake to configure, build and install the library. Then, in another CMake project, use `find_package(printf)` and make sure the install location is in the package search path.
-2. Use CMake to configure and build the library. You now have a library file (named `printf.a`, or `printf.so`, or `printf.dll` depending on your platform and choice of static vs dynamic linking), a header file, `printf.h`, and an optional extra header file `printf_config.h` with the build configuration details (usually unnecessary). In your project, if you include `printf.h` and link against the library file, you're all set: There are no dependencies.
-3. Copy `printf.c` and `printf.h` into your own project, and build them yourself. Note the various preprocessor options controlling the library's behavior! You will have to set them yourself, or accept with the default values (which are quite reasonable). Remember that the library requires compilation with the C99 language standard enabled.
-4. Include the contents of `printf.c` into your own code. This works well enough - whether it's a C or C++ file, and even within a namespace. You again need to consider the preprocessor options controlling behavior, and the language standard.
+1. Use CMake and its `FetchContent` module to download, configure and build the library:
+
+```
+include(FetchContent)
+
+option(PRINTF_BUILD_STATIC_LIBRARY "Build the printf library as static rather than shared" ON)
+# Other options defined here ...
+
+FetchContent_Declare(printf_library
+    GIT_REPOSITORY https://github.com/eyalroz/printf.git
+    GIT_TAG v5.0.0
+)
+FetchContent_MakeAvailable(printf_library)
+
+# Consume the 'printf' target later on.
+target_link_libraries(my_app PRIVATE printf)
+
+```
+
+2. Use CMake to configure, build and install the library. Then, in another CMake project, use `find_package(printf)` and make sure the install location is in the package search path.
+3. Use CMake to configure and build the library. You now have a library file (named `printf.a`, or `printf.so`, or `printf.dll` depending on your platform and choice of static vs dynamic linking), a header file, `printf.h`, and an optional extra header file `printf_config.h` with the build configuration details (usually unnecessary). In your project, if you include `printf.h` and link against the library file, you're all set: There are no dependencies.
+4. Copy `printf.c` and `printf.h` into your own project, and build them yourself. Note the various preprocessor options controlling the library's behavior! You will have to set them yourself, or accept with the default values (which are quite reasonable). Remember that the library requires compilation with the C99 language standard enabled.
+5. Include the contents of `printf.c` into your own code. This works well enough - whether it's a C or C++ file, and even within a namespace. You again need to consider the preprocessor options controlling behavior, and the language standard.
 
 As mentioned earlier, and with all four options - using `printf()` or `vprintf()` will require implementing a `_putchar(char c)` function. If you like, you can have the library functions alias the standard library function names (e.g. have `snprintf()` really invoke `snprintf_()`) using a CMake configuration option or directly with an appropriate macro.
 
