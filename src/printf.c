@@ -664,7 +664,7 @@ static size_t print_exponential_number(out_fct_type out, char* buffer, size_t id
     {
       // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
       int exp2 = get_exp2(conv);
-	  // drop the exponent, so conv.F comes into the range [1,2)
+      // drop the exponent, so conv.F comes into the range [1,2)
       conv.U = (conv.U & (( (double_uint_t)(1) << DOUBLE_STORED_MANTISSA_BITS) - 1U)) | ((double_uint_t) DOUBLE_BASE_EXPONENT << DOUBLE_STORED_MANTISSA_BITS);
       // now approximate log10 from the log2 integer part and an expansion of ln around 1.5
       exp10 = (int)(0.1760912590558 + exp2 * 0.301029995663981 + (conv.F - 1.5) * 0.289529654602168);
