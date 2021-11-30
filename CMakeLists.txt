@@ -136,7 +136,7 @@ install(
 )
 
 install(
-	FILES "src/printf.h"
+	FILES "src/printf/printf.h"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
