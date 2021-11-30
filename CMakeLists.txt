@@ -79,6 +79,7 @@ target_include_directories(
 	src
 	PUBLIC
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/>"
 )
 
 set_target_properties(printf PROPERTIES
