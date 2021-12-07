@@ -1,5 +1,7 @@
 # Standalone printf/sprintf formatted printing function library
 
+[![Build and test](https://github.com/eyalroz/printf/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/eyalroz/printf/actions/workflows/build_and_test.yml)
+[![codecov](https://codecov.io/gh/eyalroz/printf/branch/master/graph/badge.svg)](https://codecov.io/gh/eyalroz/printf)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/eyalroz/printf/master/LICENSE)
 [![Github Bug-type issues](https://shields.io/github/issues-search/eyalroz/printf?query=is:open%20is:issue%20label:bug&label=open%20bugs)](http://github.com/eyalroz/printf/issues)
 <sup>Parent repository: </sup>[![Github issues (original repo)](https://img.shields.io/github/issues/mpaland/printf.svg)](http://github.com/mpaland/printf/issues)
@@ -254,4 +256,3 @@ I try to attend to issues and PRs promptly.
 ## License
 
 This library is published under the terms of the [MIT license](http://www.opensource.org/licenses/MIT).
-
