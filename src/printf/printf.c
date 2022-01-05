@@ -491,7 +491,7 @@ static double unapply_scaling(double normalized, struct scaling_factor normaliza
   return normalization.multiply ? normalized / normalization.raw_factor : normalized * normalization.raw_factor;
 }
 
-struct scaling_factor update_normalization(struct scaling_factor sf, double extra_multiplicative_factor)
+static struct scaling_factor update_normalization(struct scaling_factor sf, double extra_multiplicative_factor)
 {
   struct scaling_factor result;
   if (sf.multiply) {
