@@ -480,6 +480,7 @@ struct scaling_factor {
   bool multiply; // if true, need to multiply by raw_factor; otherwise need to divide by it
 };
 
+#if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 static double apply_scaling(double num, struct scaling_factor normalization)
 {
   return normalization.multiply ? num * normalization.raw_factor : num / normalization.raw_factor;
@@ -514,7 +515,6 @@ struct scaling_factor update_normalization(struct scaling_factor sf, double extr
   return result;
 }
 
-#if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 static struct double_components get_normalized_components(bool negative, unsigned int precision, double non_normalized, struct scaling_factor normalization)
 {
   struct double_components components;
