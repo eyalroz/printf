@@ -34,9 +34,9 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include <string.h>
+#include <cstring>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 #include <limits>
 #include <climits>
 
@@ -306,6 +306,14 @@ TEST_CASE("+ flag", "[]" ) {
   PRINTING_CHECK("-1024",           ==, sprintf_, buffer, "%+d", -1024);
   PRINTING_CHECK("+1024",           ==, sprintf_, buffer, "%+i", 1024);
   PRINTING_CHECK("-1024",           ==, sprintf_, buffer, "%+i", -1024);
+#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+  PRINTING_CHECK("+1024",           ==, sprintf_, buffer, "%+I16", (int16_t)  1024);
+  PRINTING_CHECK("-1024",           ==, sprintf_, buffer, "%+I16", (int16_t) -1024);
+  PRINTING_CHECK("+1024",           ==, sprintf_, buffer, "%+I32", (int32_t)  1024);
+  PRINTING_CHECK("-1024",           ==, sprintf_, buffer, "%+I32", (int32_t) -1024);
+  PRINTING_CHECK("+1024",           ==, sprintf_, buffer, "%+I64", (int64_t)  1024);
+  PRINTING_CHECK("-1024",           ==, sprintf_, buffer, "%+I64", (int64_t) -1024);
+#endif
   PRINTING_CHECK("+",               ==, sprintf_, buffer, "%+.0d", 0);
 }
 
@@ -466,6 +474,21 @@ DISABLE_WARNING_POP
   PRINTING_CHECK("1024",        ==, sprintf_, buffer, "%u", 1024);
   PRINTING_CHECK("777",         ==, sprintf_, buffer, "%o", 511);
   PRINTING_CHECK("%",           ==, sprintf_, buffer, "%%");
+
+#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+  std::cerr << "Checking MSVC_STYLE_INTEGER_SPECIFIERS" << std::endl;
+  PRINTING_CHECK("127",         ==, sprintf_, buffer, "%I8", (int8_t) 127LL);
+#if (SHRT_MAX >= 32767)
+  PRINTING_CHECK("32767",  ==, sprintf_, buffer, "%I16", (int16_t) 32767LL);
+#endif
+#if (LLONG_MAX >= 2147483647)
+  PRINTING_CHECK("2147483647",  ==, sprintf_, buffer, "%I32", (int32_t)  2147483647LL);
+#if (LLONG_MAX >= 9223372036854775807LL)
+  PRINTING_CHECK("9223372036854775807",  ==, sprintf_, buffer, "%I64", (int64_t) 9223372036854775807LL);
+  std::cerr << "buffer is " << buffer << std::endl;
+#endif
+#endif
+#endif // PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 }
 
 
