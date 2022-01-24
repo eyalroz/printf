@@ -1257,7 +1257,7 @@ int vsprintf_(char* s, const char* format, va_list arg)
 
 int vsnprintf_(char* s, size_t n, const char* format, va_list arg)
 {
-  printf_size_t usable_buffer_size = (n > PRINTF_MAX_POSSIBLE_BUFFER_SIZE) ? PRINTF_MAX_POSSIBLE_BUFFER_SIZE : n;
+  printf_size_t usable_buffer_size = (n > PRINTF_MAX_POSSIBLE_BUFFER_SIZE) ? PRINTF_MAX_POSSIBLE_BUFFER_SIZE : (printf_size_t) n;
   return _vsnprintf(out_buffer, s, usable_buffer_size, format, arg);
 }
 
