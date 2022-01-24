@@ -1073,7 +1073,7 @@ TEST_CASE("string length", "[]" ) {
   PRINTING_CHECK("123", ==, sprintf_, buffer, "%.7s", "123");
   PRINTING_CHECK("", ==, sprintf_, buffer, "%.7s", "");
   PRINTING_CHECK("1234ab", ==, sprintf_, buffer, "%.4s%.2s", "123456", "abcdef");
-  PRINTING_CHECK(".2s", ==, sprintf_, buffer, "%.4.2s", "123456");
+  PRINTING_CHECK(".2s", ==, sprintf_, buffer, "%4.2s", "123456");
   PRINTING_CHECK("123", ==, sprintf_, buffer, "%.*s", 3, "123456");
 
 DISABLE_WARNING_PUSH
