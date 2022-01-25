@@ -78,6 +78,17 @@ extern "C" {
 # define vprintf_   vprintf
 #endif
 
+// If you have -Wfloat-equal enabled, this source code will emit a number
+// of warnings for float comparisons for equality. However, within the
+// context of their use in this library, these are ok to use. So we
+// disable the warning for this file.
+// Define PRINTF_DISABLE_WARNING_PRAGMAS to disable this block
+#ifndef PRINTF_DISABLE_WARNING_PRAGMAS
+#if defined(__GNUC__) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif // __GNUC__ || defined (__clang__)
+#endif // PRINTF_DISABLE_WARNING_PRAGMAS
 
 // 'ntoa' conversion buffer size, this must be big enough to hold one converted
 // numeric number including padded zeros (dynamically created on stack)
@@ -1303,6 +1314,13 @@ int fctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char*
   return ret;
 }
 
+// Restore the previous diagnostic state
+// Define PRINTF_DISABLE_WARNING_PRAGMAS to disable this block
+#ifndef PRINTF_DISABLE_WARNING_PRAGMAS
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif // __GNUC__ || __clang__
+#endif // PRINTF_DISABLE_WARNING_PRAGMAS
 
 #ifdef __cplusplus
 } // extern "C"
