@@ -261,10 +261,10 @@ static inline double_with_bit_access get_bit_access(double x)
   return dwba;
 }
 
-static inline int get_sign(double x)
+static inline int get_sign_bit(double x)
 {
   // The sign is stored in the highest bit
-  return get_bit_access(x).U >> (DOUBLE_SIZE_IN_BITS - 1);
+  return (int) (get_bit_access(x).U >> (DOUBLE_SIZE_IN_BITS - 1));
 }
 
 static inline int get_exp2(double_with_bit_access x)
@@ -358,7 +358,7 @@ static inline output_gadget_t discarding_gadget()
 static inline output_gadget_t buffer_gadget(char* buffer, size_t buffer_size)
 {
   printf_size_t usable_buffer_size = (buffer_size > PRINTF_MAX_POSSIBLE_BUFFER_SIZE) ?
-    PRINTF_MAX_POSSIBLE_BUFFER_SIZE : buffer_size;
+    PRINTF_MAX_POSSIBLE_BUFFER_SIZE : (printf_size_t) buffer_size;
   output_gadget_t result = discarding_gadget();
   if (buffer != NULL) {
     result.buffer = buffer;
@@ -539,9 +539,13 @@ static void print_integer(output_gadget_t* output, printf_unsigned_value_t value
 
 #if (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 
+// Stores a fixed-precision representation of a double relative
+// to a fixed precision (which cannot be determined by examining this structure)
 struct double_components {
   int_fast64_t integral;
   int_fast64_t fractional;
+    // ... truncation of the actual fractional part of the double value, scaled
+    // by the precision value
   bool is_negative;
 };
 
@@ -561,10 +565,10 @@ static const double powers_of_10[NUM_DECIMAL_DIGITS_IN_INT64_T] = {
 static struct double_components get_components(double number, printf_size_t precision)
 {
   struct double_components number_;
-  number_.is_negative = get_sign(number);
+  number_.is_negative = get_sign_bit(number);
   double abs_number = (number_.is_negative) ? -number : number;
   number_.integral = (int_fast64_t)abs_number;
-  double remainder = (abs_number - number_.integral) * powers_of_10[precision];
+  double remainder = (abs_number - (double) number_.integral) * powers_of_10[precision];
   number_.fractional = (int_fast64_t)remainder;
 
   remainder -= (double) number_.fractional;
@@ -654,7 +658,7 @@ static struct double_components get_normalized_components(bool negative, printf_
   }
   else {
     components.fractional = (int_fast64_t) scaled_remainder;
-    scaled_remainder -= components.fractional;
+    scaled_remainder -= (double) components.fractional;
 
     components.fractional += (scaled_remainder >= rounding_threshold);
     if (scaled_remainder == rounding_threshold) {
@@ -765,7 +769,7 @@ static void print_decimal_number(output_gadget_t* output, double number, printf_
 // internal ftoa variant for exponential floating-point type, contributed by Martijn Jasperse <m.jasperse@gmail.com>
 static void print_exponential_number(output_gadget_t* output, double number, printf_size_t precision, printf_size_t width, printf_flags_t flags, char* buf, printf_size_t len)
 {
-  const bool negative = get_sign(number);
+  const bool negative = get_sign_bit(number);
   // This number will decrease gradually (by factors of 10) as we "extract" the exponent out of it
   double abs_number =  negative ? -number : number;
 
