@@ -223,6 +223,8 @@ typedef unsigned int printf_flags_t;
 typedef uint32_t double_uint_t;
 #define DOUBLE_EXPONENT_MASK 0xFFU
 #define DOUBLE_BASE_EXPONENT 127
+#define DOUBLE_MAX_SUBNORMAL_EXPONENT_OF_10 -38
+#define DOUBLE_MAX_SUBNORMAL_POWER_OF_10 1e-38
 
 #elif DBL_MANT_DIG == 53
 
@@ -230,6 +232,8 @@ typedef uint32_t double_uint_t;
 typedef uint64_t double_uint_t;
 #define DOUBLE_EXPONENT_MASK 0x7FFU
 #define DOUBLE_BASE_EXPONENT 1023
+#define DOUBLE_MAX_SUBNORMAL_EXPONENT_OF_10 -308
+#define DOUBLE_MAX_SUBNORMAL_POWER_OF_10 1e-308
 
 #else
 #error "Unsupported double type configuration"
@@ -650,11 +654,20 @@ static struct scaling_factor update_normalization(struct scaling_factor sf, doub
   return result;
 }
 
-static struct double_components get_normalized_components(bool negative, printf_size_t precision, double non_normalized, struct scaling_factor normalization)
+static struct double_components get_normalized_components(bool negative, printf_size_t precision, double non_normalized, struct scaling_factor normalization, int floored_exp10)
 {
   struct double_components components;
   components.is_negative = negative;
-  components.integral = (int_fast64_t) apply_scaling(non_normalized, normalization);
+  double scaled = apply_scaling(non_normalized, normalization);
+
+  bool close_to_representation_extremum = ( (-floored_exp10 + (int) precision) >= DBL_MAX_10_EXP - 1 );
+  if (close_to_representation_extremum) {
+    // We can't have a normalization factor which also accounts for the precision, i.e. moves
+    // some decimal digits into the mantissa, since it's unrepresentable, or nearly unrepresentable.
+    // So, we'll give up early on getting extra precision...
+    return get_components(negative ? -scaled : scaled, precision);
+  }
+  components.integral = (int_fast64_t) scaled;
   double remainder = non_normalized - unapply_scaling((double) components.integral, normalization);
   double prec_power_of_10 = powers_of_10[precision];
   struct scaling_factor account_for_precision = update_normalization(normalization, prec_power_of_10);
@@ -819,6 +832,10 @@ static double log10_of_positive(double positive_number)
 
 static double pow10_of_int(int floored_exp10)
 {
+  // A crude hack for avoiding undesired behavior with barely-normal or slightly-subnormal values.
+  if (floored_exp10 == DOUBLE_MAX_SUBNORMAL_EXPONENT_OF_10) {
+    return DOUBLE_MAX_SUBNORMAL_POWER_OF_10;
+  }
   // Compute 10^(floored_exp10) but (try to) make sure that doesn't overflow
   double_with_bit_access dwba;
   int exp2 = bastardized_floor(floored_exp10 * 3.321928094887362 + 0.5);
@@ -887,7 +904,7 @@ static void print_exponential_number(output_gadget_t* output, double number, pri
   struct double_components decimal_part_components =
     should_skip_normalization ?
     get_components(negative ? -abs_number : abs_number, precision) :
-    get_normalized_components(negative, precision, abs_number, normalization);
+    get_normalized_components(negative, precision, abs_number, normalization, floored_exp10);
 
   // Account for roll-over, e.g. rounding from 9.99 to 100.0 - which effects
   // the exponent and may require additional tweaking of the parts

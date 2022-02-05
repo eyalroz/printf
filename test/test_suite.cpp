@@ -1002,6 +1002,7 @@ TEST_CASE("floating-point specifiers, precision and flags", "[]" ) {
   PRINTING_CHECK("0.0012",           ==, sprintf_, buffer, "%.2G", 0.001234);
   PRINTING_CHECK(" +0.001234",       ==, sprintf_, buffer, "%+10.4G", 0.001234);
   PRINTING_CHECK("+001.234e-05",     ==, sprintf_, buffer, "%+012.4g", 0.00001234);
+  // Note: The following two values are _barely_ normal; make their mantissa 1.1 and they lose their normality.
   PRINTING_CHECK("-1.23e-308",       ==, sprintf_, buffer, "%.3g", -1.2345e-308);
   PRINTING_CHECK("+1.230E+308",      ==, sprintf_, buffer, "%+.3E", 1.23e+308);
   PRINTING_CHECK("1.000e+01",        ==, sprintf_, buffer, "%.3e", 9.9996);
@@ -1012,6 +1013,8 @@ TEST_CASE("floating-point specifiers, precision and flags", "[]" ) {
   PRINTING_CHECK("-4e+04",           ==, sprintf_, buffer, "%.1g", -40661.5);
   PRINTING_CHECK("-4.e+04",          ==, sprintf_, buffer, "%#.1g", -40661.5);
   PRINTING_CHECK("100.",             ==, sprintf_, buffer, "%#.3g", 99.998580932617187500);
+  // Note: The following value is _barely_ normal; make the mantissa 1.1 and it loses its normality.
+  PRINTING_CHECK("1.2345678901e-308", ==, sprintf_, buffer, "%.10e", 1.2345678901e-308);
   // Rounding-focused checks
   PRINTING_CHECK("4.895512e+04",     ==, sprintf_, buffer, "%e", 48955.125);
   PRINTING_CHECK("9.2524e+04",       ==, sprintf_, buffer, "%.4e", 92523.5);
