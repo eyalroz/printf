@@ -65,6 +65,14 @@ typedef SSIZE_T ssize_t;
 // Let's just cross our fingers and hope `ssize_t` is defined.
 #endif
 
+
+#ifndef STRINGIFY
+#define STRINGIFY(_x) #_x
+#endif
+#ifndef EXPAND_AND_STRINGIFY
+#define EXPAND_AND_STRINGIFY(_x) STRINGIFY(_x)
+#endif
+
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 // Re-enable aliasing
 # define printf     printf_
@@ -421,18 +429,26 @@ PRINTF_TEST_CASE(brute_force_float)
   any_failed = false;
   long n = 0;
   for (float i = (float) -1e20; i < (float) 1e20; i += (float) 1e15, n++) {
-    sprintf_(buffer, "%.5f", (double) i);
+#if PRINTF_USE_DOUBLE_INTERNALLY
+#define LOOP_PRECISION 4
+#else
+  // You're kind of screwed here...
+#define LOOP_PRECISION 1
+#endif
+    sprintf_(buffer, "%." EXPAND_AND_STRINGIFY(LOOP_PRECISION) "f", (double) i);
     sstr.str("");
-    sstr << i;
-    if (strcmp(buffer, sstr.str().c_str()) != 0) {
+    sstr << std::setprecision(LOOP_PRECISION) << i;
+    auto expected = sstr.str().c_str();
+    if (strcmp(buffer, expected) != 0) {
       std::cerr
-      << n << ": sprintf_(\"%.5f\", " << std::setw(18) << std::setprecision(30) << i << ") = " << std::setw(15)
+      << n << ": sprintf_(\"%" EXPAND_AND_STRINGIFY(LOOP_PRECISION) "f\", " << std::setw(18) << std::setprecision(30) << i << ") = " << std::setw(15)
       << buffer << " , "
       << "expected " << std::setw(12) << sstr.str().c_str() << "\n";
       any_failed = true;
     }
   }
   CHECK(not any_failed);
+#undef LOOP_PRECISION
 #endif
 #endif
 }
