@@ -43,13 +43,13 @@ The author of this fork was one of the latercomer bug-reporters-and-PR-authors; 
 **Use involving CMake:**
 
 1. Use CMake to configure, build and install the library. Then, in another CMake project, use `find_package(printf)` and make sure the library's install location is in CMake's package search path.
-2. Use CMake to configure and build the library. This results in the following file:
+2. Use CMake to configure and build the library. This results in the following files:
 
    * An object code library file (named `printf.a`, or `printf.so`, or `printf.dll` depending on your platform and choice of static vs dynamic linking)
    * A header file, `printf.h`
    * (Unnecessary) An optional extra header file `printf_config.h` with the build configuration details. 
 
-   Now, in your project, include `printf.h` and link against the library file, you're all set: There are no dependencies to satisfy or keep track of. 
+   Now, in your project, include `printf.h` and link against the library file... and you are all set! There are no dependencies to satisfy or keep track of. 
 3. Use CMake's `FetchContent` module to obtain the project source code and make it part of your own project's build, e.g.:
    ```
    FetchContent_Declare(printf_library
@@ -61,13 +61,13 @@ The author of this fork was one of the latercomer bug-reporters-and-PR-authors; 
 **Use not involving CMake:**
 
 4. Copy `printf.c` and `printf.h` into your own project, and compile the source however you see fit. Remember that the library requires compilation with the C99 language standard enabled.
-5. Include the contents of `printf.c` into your own code - which can be either C or C++. Remember, though, the library is written in the "intersection" of C99 and C++11, so older-standard C programs may not just accept it.
+5. Include the contents of `printf.c` into your own code - which can be either C or C++. Remember, though, the library does rely on C99 features, so older-standard C programs may not accept it.
 
 Whichever way you choose to use the library:
 
-* You can have this library stand-in for the C standard library's `printf()` family of functions, e.g. provide `snprintf()` instead of `snprintf_()`, by setting an appropriate [preprocessor definition](#cmake-options-and-preprocessor-definitions) during compilation and use. 
+* You can have this library stand-in for the C standard library's `printf()` family of functions - provide `printf()` instead of `printf_()`, `sprintf_()` instead of `sprintf_()` etc. - by setting an appropriate [preprocessor definition](#cmake-options-and-preprocessor-definitions) during compilation and use. 
 * Speaking of the preprocessor definition [preprocessor definitions](#cmake-options-and-preprocessor-definitions) which affect the library's behavior - you have to be consistent in their choice when building and when using the library. (The easiest way to do that is just not to change any of them and accept the reasonable defaults.)
-* Two of the functions --- `printf_()` and `vprintf_()` --- will only be usable if you implement a `putchar_(char c)` function to  underlie them.
+* Two of the functions - `printf_()` and `vprintf_()` - will only be usable if you implement a `putchar_(char c)` function to underlie them.
 * **Avoid `sprintf()` in favor of `snprintf()` for safety and security** - and that goes for the standard C library `sprintf()` as well:. `sprintf()` is unaware of the amount of memory allocated for the string it writes into, and will "happily" overflow your buffer; instead of calling it, pass your buffer size to `snprintf()` - and avoid overflow.
 
 Finally, if you've started using the library in a publicly-available (FOSS or commercial) project, please consider emailing [@eyalroz](https://github.com/eyalroz), or open an [issue](https://github.com/eyalroz/printf/issues/), to announce this.
