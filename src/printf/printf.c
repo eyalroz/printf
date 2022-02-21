@@ -240,27 +240,6 @@ typedef uint64_t double_uint_t;
 #endif
 #define DOUBLE_STORED_MANTISSA_BITS (DBL_MANT_DIG - 1)
 
-#if PRINTF_SUPPORT_LONG_LONG
-typedef unsigned long long printf_unsigned_value_t;
-typedef long long          printf_signed_value_t;
-#else
-typedef unsigned long printf_unsigned_value_t;
-typedef long          printf_signed_value_t;
-#endif
-
-typedef uint8_t numeric_base_t;
-
-// The printf()-family functions return an `int`; it is therefore
-// unnecessary/inappropriate to use size_t - often larger than int
-// in practice - for non-negative related values, such as widths,
-// precisions, offsets into buffers used for printing and the sizes
-// of these buffers. instead, we use:
-typedef unsigned int printf_size_t;
-#define PRINTF_MAX_POSSIBLE_BUFFER_SIZE INT_MAX
-  // If we were to nitpick, this would actually be INT_MAX + 1,
-  // since INT_MAX is the maximum return value, which excludes the
-  // trailing '\0'.
-
 typedef union {
   double_uint_t U;
   double        F;
@@ -295,6 +274,27 @@ static inline int get_exp2(double_with_bit_access x)
 #define PRINTF_ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
 
 #endif // (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
+
+#if PRINTF_SUPPORT_LONG_LONG
+typedef unsigned long long printf_unsigned_value_t;
+typedef long long          printf_signed_value_t;
+#else
+typedef unsigned long printf_unsigned_value_t;
+typedef long          printf_signed_value_t;
+#endif
+
+typedef uint8_t numeric_base_t;
+
+// The printf()-family functions return an `int`; it is therefore
+// unnecessary/inappropriate to use size_t - often larger than int
+// in practice - for non-negative related values, such as widths,
+// precisions, offsets into buffers used for printing and the sizes
+// of these buffers. instead, we use:
+typedef unsigned int printf_size_t;
+#define PRINTF_MAX_POSSIBLE_BUFFER_SIZE INT_MAX
+  // If we were to nitpick, this would actually be INT_MAX + 1,
+  // since INT_MAX is the maximum return value, which excludes the
+  // trailing '\0'.
 
 // Note in particular the behavior here on LONG_MIN or LLONG_MIN; it is valid
 // and well-defined, but if you're not careful you can easily trigger undefined
