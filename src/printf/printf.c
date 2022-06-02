@@ -1030,9 +1030,9 @@ static printf_flags_t parse_flags(const char** format)
 // internal vsnprintf - used for implementing _all library functions
 // Note: We don't like the C standard's parameter names, so using more informative parameter names
 // here instead.
-static int _vsnprintf(output_gadget_t* output, const char* format, va_list args)
+static int vsnprintf_impl(output_gadget_t* output, const char* format, va_list args)
 {
-  // Note: The library only calls _vsnprintf() with output->pos being 0. However, it is
+  // Note: The library only calls vsnprintf_impl() with output->pos being 0. However, it is
   // possible to call this function with a non-zero pos value for some "remedial printing".
 
   while (*format)
@@ -1353,13 +1353,13 @@ static int _vsnprintf(output_gadget_t* output, const char* format, va_list args)
 int vprintf_(const char* format, va_list arg)
 {
   output_gadget_t gadget = extern_putchar_gadget();
-  return _vsnprintf(&gadget, format, arg);
+  return vsnprintf_impl(&gadget, format, arg);
 }
 
 int vsnprintf_(char* s, size_t n, const char* format, va_list arg)
 {
   output_gadget_t gadget = buffer_gadget(s, n);
-  return _vsnprintf(&gadget, format, arg);
+  return vsnprintf_impl(&gadget, format, arg);
 }
 
 int vsprintf_(char* s, const char* format, va_list arg)
@@ -1370,7 +1370,7 @@ int vsprintf_(char* s, const char* format, va_list arg)
 int vfctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char* format, va_list arg)
 {
   output_gadget_t gadget = function_gadget(out, extra_arg);
-  return _vsnprintf(&gadget, format, arg);
+  return vsnprintf_impl(&gadget, format, arg);
 }
 
 int printf_(const char* format, ...)
