@@ -59,12 +59,24 @@ extern "C" {
 #include <printf/printf.h>
 
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
-# define printf_    printf
-# define sprintf_   sprintf
-# define vsprintf_  vsprintf
-# define snprintf_  snprintf
-# define vsnprintf_ vsnprintf
-# define vprintf_   vprintf
+# ifdef PRINTF_ALIAS_PREFIX
+#  error incompatible options PRINTF_ALIAS_STANDARD_FUNCTION_NAMES and PRINTF_ALIAS_PREFIX
+# endif
+# define PRINTF_ALIAS_PREFIX
+# define PRINTF_ALIAS 1
+#elif defined(PRINTF_ALIAS_PREFIX)
+# define PRINTF_ALIAS 1
+#else
+# define PRINTF_ALIAS 0
+#endif 
+
+#if PRINTF_ALIAS
+# define printf_    PRINTF_ALIAS_PREFIX ## printf
+# define sprintf_   PRINTF_ALIAS_PREFIX ## sprintf
+# define vsprintf_  PRINTF_ALIAS_PREFIX ## vsprintf
+# define snprintf_  PRINTF_ALIAS_PREFIX ## snprintf
+# define vsnprintf_ PRINTF_ALIAS_PREFIX ## vsnprintf
+# define vprintf_   PRINTF_ALIAS_PREFIX ## vprintf
 #endif
 
 
