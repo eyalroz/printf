@@ -624,7 +624,10 @@ static double apply_scaling(double num, struct scaling_factor normalization)
 
 static double unapply_scaling(double normalized, struct scaling_factor normalization)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
   return normalization.multiply ? normalized / normalization.raw_factor : normalized * normalization.raw_factor;
+#pragma GCC diagnostic pop
 }
 
 static struct scaling_factor update_normalization(struct scaling_factor sf, double extra_multiplicative_factor)
@@ -853,7 +856,7 @@ static void print_exponential_number(output_gadget_t* output, double number, pri
 
   int floored_exp10;
   bool abs_exp10_covered_by_powers_table;
-  struct scaling_factor normalization = {0};
+  struct scaling_factor normalization;
 
 
   // Determine the decimal exponent
