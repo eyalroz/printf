@@ -46,11 +46,11 @@
 #include <iostream>
 #include <iomanip>
 
-#if defined(_WIN32)
+#if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)) || defined(__MINGW32__)
+#include <sys/types.h>
+#elif defined(_WIN32)
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
-#elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-#include <sys/types.h>
 #else
 // Let's just cross our fingers and hope `ssize_t` is defined.
 #endif
