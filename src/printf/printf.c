@@ -853,7 +853,7 @@ static void print_exponential_number(output_gadget_t* output, double number, pri
 
   int floored_exp10;
   bool abs_exp10_covered_by_powers_table;
-  struct scaling_factor normalization;
+  struct scaling_factor normalization = {0};
 
 
   // Determine the decimal exponent
