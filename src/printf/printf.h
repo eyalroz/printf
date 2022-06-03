@@ -62,12 +62,12 @@ __attribute__((format(__printf__, (one_based_format_index), (first_arg))))
 #endif
 
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
-# define printf_    printf
-# define sprintf_   sprintf
-# define vsprintf_  vsprintf
-# define snprintf_  snprintf
-# define vsnprintf_ vsnprintf
-# define vprintf_   vprintf
+# define printf    printf_
+# define sprintf   sprintf_
+# define vsprintf  vsprintf_
+# define snprintf  snprintf_
+# define vsnprintf vsnprintf_
+# define vprintf   vprintf_
 #endif
 
 // If you want to include this implementation file directly rather than
