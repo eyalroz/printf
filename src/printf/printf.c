@@ -358,7 +358,7 @@ static inline void putchar_wrapper(char c, void* unused)
   putchar_(c);
 }
 
-static inline output_gadget_t discarding_gadget()
+static inline output_gadget_t discarding_gadget(void)
 {
   output_gadget_t gadget;
   gadget.function = NULL;
@@ -390,7 +390,7 @@ static inline output_gadget_t function_gadget(void (*function)(char, void*), voi
   return result;
 }
 
-static inline output_gadget_t extern_putchar_gadget()
+static inline output_gadget_t extern_putchar_gadget(void)
 {
   return function_gadget(putchar_wrapper, NULL);
 }
