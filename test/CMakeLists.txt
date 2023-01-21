@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 enable_language(CXX)
 
 set(test_targets autotest)
-if (NOT ALIAS_STANDARD_FUNCTION_NAMES STREQUAL SOFT)
+if (NOT ALIAS_STANDARD_FUNCTION_NAMES STREQUAL NONE)
 	list(APPEND test_targets test_suite)
 endif()
 
@@ -33,6 +33,9 @@ set_target_properties(
 	C_STANDARD_REQUIRED YES
 	C_EXTENSIONS NO
 )
+if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+	target_compile_options(aliasing PRIVATE -fno-builtin-printf)
+endif()
 list(APPEND test_targets aliasing)
 
 foreach(tgt ${test_targets})

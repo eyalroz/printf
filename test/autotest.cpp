@@ -14,11 +14,15 @@
 #include "printf_config.h"
 #include "../src/printf/printf.h"
 
-#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES 0
+#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT
+#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT 0
 #endif
 
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
+#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
+#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD 0
+#endif
+
+#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT || PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 # define printf_    printf
 # define sprintf_   sprintf
 # define vsprintf_  vsprintf
@@ -598,6 +602,7 @@ static void test_g(void)
   fprintf(dst, "gnu = \"%s\"\n", std_buf);
   fprintf(dst, "mpa = \"%s\"\n", tst_buf);
 }
+
 
 float rand_float(float a, float b)
 {

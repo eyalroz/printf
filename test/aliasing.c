@@ -34,7 +34,7 @@ void clear_buffer(void)
 
 int main(void)
 {
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
+#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT || PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
   clear_buffer();
   printf("printf'ing an integer: %d and a string: %s\n", 12, "Hello world");
   const char* expected = "printf'ing an integer: 12 and a string: Hello world\n";

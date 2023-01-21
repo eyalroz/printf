@@ -54,7 +54,7 @@
 #include <stdbool.h>
 #endif // __cplusplus
 
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
+#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 # define printf_    printf
 # define sprintf_   sprintf
 # define vsprintf_  vsprintf
