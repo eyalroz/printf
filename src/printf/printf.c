@@ -331,9 +331,7 @@ static inline void putchar_via_gadget(output_gadget_t* gadget, char c)
     // No check for c == '\0' .
     gadget->function(c, gadget->extra_function_arg);
   }
-  else {
-    // it must be the case that gadget->buffer != NULL , due to the constraint
-    // on output_gadget_t ; and note we're relying on write_pos being non-negative.
+  if (gadget->buffer == NULL) {
     gadget->buffer[write_pos] = c;
   }
 }
