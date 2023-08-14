@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2021, Meco Jianting Man <jiantingman@foxmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2021-11-27     Meco Man     porting for rt_vsnprintf as the fully functional version
+ * 2023-08-13     Meco Man     v2.0
+ */
 /**
  * @author (c) Eyal Rozenberg <eyalroz1@gmx.com>
  *             2021-2022, Haifa, Palestine/Israel
