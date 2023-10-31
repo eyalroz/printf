@@ -163,7 +163,7 @@
 #define FLAGS_SIGNED    (1U << 14U)
   // Only used with PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if (PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS || PRINTF_SUPPORT_HUMAN_STYLE_SPECIFIERS)
 
 #define FLAGS_INT8 FLAGS_CHAR
 
@@ -204,7 +204,7 @@
 #error "No basic integer type has a size of 64 bits exactly"
 #endif
 
-#endif // PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#endif // PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS || PRINTF_SUPPORT_HUMAN_STYLE_SPECIFIERS
 
 
 typedef unsigned int printf_flags_t;
@@ -1219,6 +1219,28 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
         }
 
         format++;
+#if PRINTF_SUPPORT_HUMAN_STYLE_SPECIFIERS
+        if ((flags & (FLAGS_LONG_LONG | FLAGS_LONG | FLAGS_SHORT | FLAGS_CHAR)) == 0) {
+          const char* format_next = format + 1;
+          switch(*format) {
+            case '8':
+              flags |= FLAGS_INT8;
+              format = format_next;
+              break;
+            case '1':
+              if (*format_next == '6') { format = format_next + 1; flags |= FLAGS_INT16; }
+              break;
+            case '3':
+              if (*format_next == '2') { format = format_next + 1; flags |= FLAGS_INT32; }
+              break;
+            case '6':
+              if (*format_next == '4') { format = format_next + 1; flags |= FLAGS_INT64; }
+              break;
+            default:
+              break;
+          }
+        }
+#endif
         // ignore '0' flag when precision is given
         if (flags & FLAGS_PRECISION) {
           flags &= ~FLAGS_ZEROPAD;
