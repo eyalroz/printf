@@ -656,7 +656,9 @@ static floating_point_t unapply_scaling(floating_point_t normalized, struct scal
 #ifdef __GNUC__
 // accounting for a static analysis bug in GCC 6.x and earlier
 #pragma GCC diagnostic push
+#if !defined(__has_warning) || __has_warning("-Wmaybe-uninitialized")
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #endif
   return normalization.multiply ? normalized / normalization.raw_factor : normalized * normalization.raw_factor;
 #ifdef __GNUC__
@@ -936,7 +938,9 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 #ifdef __GNUC__
 // accounting for a static analysis bug in GCC 6.x and earlier
 #pragma GCC diagnostic push
+#if !defined(__has_warning) || __has_warning("-Wmaybe-uninitialized")
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #endif
   normalization.multiply = (floored_exp10 < 0 && abs_exp10_covered_by_powers_table);
 #ifdef __GNUC__
