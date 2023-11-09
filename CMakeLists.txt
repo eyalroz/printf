@@ -185,6 +185,12 @@ install(
 
 include(CMakePackageConfigHelpers)
 
+configure_package_config_file(
+	"printf-config.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
+	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+)
+
 write_basic_package_version_file(
 	"printf-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
@@ -193,5 +199,6 @@ write_basic_package_version_file(
 
 install(
 	FILES "${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
+		  "${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
 	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
 )
