@@ -144,23 +144,24 @@
 #define PRINTF_FLOAT_NOTATION_THRESHOLD ((floating_point_t) PRINTF_EXPAND_THEN_CONCATENATE(1e,PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL))
 
 // internal flag definitions
-#define FLAGS_ZEROPAD   (1U <<  0U)
-#define FLAGS_LEFT      (1U <<  1U)
-#define FLAGS_PLUS      (1U <<  2U)
-#define FLAGS_SPACE     (1U <<  3U)
-#define FLAGS_HASH      (1U <<  4U)
-#define FLAGS_UPPERCASE (1U <<  5U)
-#define FLAGS_CHAR      (1U <<  6U)
-#define FLAGS_SHORT     (1U <<  7U)
-#define FLAGS_INT       (1U <<  8U)
+#define FLAGS_ZEROPAD     (1U <<  0U)
+#define FLAGS_LEFT        (1U <<  1U)
+#define FLAGS_PLUS        (1U <<  2U)
+#define FLAGS_SPACE       (1U <<  3U)
+#define FLAGS_HASH        (1U <<  4U)
+#define FLAGS_UPPERCASE   (1U <<  5U)
+#define FLAGS_CHAR        (1U <<  6U)
+#define FLAGS_SHORT       (1U <<  7U)
+#define FLAGS_INT         (1U <<  8U)
   // Only used with PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
-#define FLAGS_LONG      (1U <<  9U)
-#define FLAGS_LONG_LONG (1U << 10U)
-#define FLAGS_PRECISION (1U << 11U)
-#define FLAGS_ADAPT_EXP (1U << 12U)
-#define FLAGS_POINTER   (1U << 13U)
+#define FLAGS_LONG        (1U <<  9U)
+#define FLAGS_LONG_LONG   (1U << 10U)
+#define FLAGS_PRECISION   (1U << 11U)
+#define FLAGS_ADAPT_EXP   (1U << 12U)
+#define FLAGS_POINTER     (1U << 13U)
   // Note: Similar, but not identical, effect as FLAGS_HASH
-#define FLAGS_SIGNED    (1U << 14U)
+#define FLAGS_SIGNED      (1U << 14U)
+#define FLAGS_LONG_DOUBLE (1U << 15U)
   // Only used with PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 
 #ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
@@ -241,6 +242,10 @@ typedef unsigned int printf_size_t;
 #error "Non-binary-radix floating-point types are unsupported."
 #endif
 
+/**
+ * Currently doesn't support for PRINTF_USE_LONG_DOUBLE_INTERNALLY,
+ * we currently use double to printf long double
+ */
 #if PRINTF_USE_DOUBLE_INTERNALLY
 typedef double floating_point_t;
 #define FP_TYPE_MANT_DIG DBL_MANT_DIG
@@ -1169,6 +1174,10 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
           ADVANCE_IN_FORMAT_STRING(format);
         }
         break;
+      case 'L' :
+        flags |= FLAGS_LONG_DOUBLE;
+        ADVANCE_IN_FORMAT_STRING(format);
+        break;
       case 'h' :
         flags |= FLAGS_SHORT;
         ADVANCE_IN_FORMAT_STRING(format);
@@ -1282,22 +1291,26 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       }
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
       case 'f' :
-      case 'F' :
+      case 'F' : {
+        floating_point_t va_float = (floating_point_t) (flags & FLAGS_LONG_DOUBLE ? va_arg(args, long double) : va_arg(args, double));
         if (*format == 'F') flags |= FLAGS_UPPERCASE;
-        print_floating_point(output, (floating_point_t) va_arg(args, double), precision, width, flags, PRINTF_PREFER_DECIMAL);
+        print_floating_point(output, va_float, precision, width, flags, PRINTF_PREFER_DECIMAL);
         format++;
         break;
+      }
 #endif
 #if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
       case 'e':
       case 'E':
       case 'g':
-      case 'G':
+      case 'G': {
+        floating_point_t va_float = (floating_point_t) (flags & FLAGS_LONG_DOUBLE ? va_arg(args, long double) : va_arg(args, double));
         if ((*format == 'g')||(*format == 'G')) flags |= FLAGS_ADAPT_EXP;
         if ((*format == 'E')||(*format == 'G')) flags |= FLAGS_UPPERCASE;
-        print_floating_point(output, (floating_point_t) va_arg(args, double), precision, width, flags, PRINTF_PREFER_EXPONENTIAL);
+        print_floating_point(output, va_float, precision, width, flags, PRINTF_PREFER_EXPONENTIAL);
         format++;
         break;
+      }
 #endif  // PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
       case 'c' : {
         printf_size_t l = 1U;

@@ -792,6 +792,23 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
   PRINTING_CHECK("3.5",                     ==, sprintf_, buffer, "%.1f", 3.49);
   PRINTING_CHECK("a0.5  ",                  ==, sprintf_, buffer, "a%-5.1f", 0.5);
   PRINTING_CHECK("a0.5  end",               ==, sprintf_, buffer, "a%-5.1fend", 0.5);
+
+  /* %f for float that promote to double */
+  PRINTING_CHECK("42.895221710205",         ==, sprintf_, buffer, "%.12f", 42.89522312345678f);
+  PRINTING_CHECK("42.895221710205",         ==, sprintf_, buffer, "%.12f", 42.89522312345678F);
+  /* %f for double */
+  PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12f", 42.89522312345678);
+  /* %F for double */
+  PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12F", 42.89522312345678);
+  /* %lf for float that promote to double */
+  PRINTING_CHECK("42.895221710205",         ==, sprintf_, buffer, "%.12lf", 42.89522312345678f);
+  PRINTING_CHECK("42.895221710205",         ==, sprintf_, buffer, "%.12lf", 42.89522312345678F);
+  /* %lf for double */
+  PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12lf", 42.89522312345678);
+  /* %Lf for long double */
+  PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12Lf", 42.89522312345678l);
+  PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12Lf", 42.89522312345678L);
+
 #endif
 #if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
   PRINTING_CHECK("0.5",                     ==, sprintf_, buffer, "%.4g", 0.5);
@@ -821,6 +838,38 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
   PRINTING_CHECK("4.895512e+04",            ==, sprintf_, buffer, "%e", 48955.125);
   PRINTING_CHECK("9.2524e+04",              ==, sprintf_, buffer, "%.4e", 92523.5);
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375);
+
+  /* %g for float that promote to double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3g", 99.998580932617187500f);
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3g", 99.998580932617187500F);
+  /* %g for double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3g", 99.998580932617187500);
+  /* %G for double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3G", 99.998580932617187500);
+  /* %lg for float that promote to double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3lg", 99.998580932617187500f);
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3lg", 99.998580932617187500F);
+  /* %lg for double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3lg", 99.998580932617187500);
+  /* %Lg for long double */
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3Lg", 99.998580932617187500l);
+  PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3Lg", 99.998580932617187500L);
+
+  /* %e for float that promote to double */
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375f);
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375F);
+  /* %e for double */
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375);
+  /* %E for double */
+  PRINTING_CHECK("-8.380923438E+04",        ==, sprintf_, buffer, "%.9E", -83809.234375);
+  /* %le for float that promote to double */
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9le", -83809.234375f);
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9le", -83809.234375F);
+  /* %le for double */
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9le", -83809.234375);
+  /* %Le for long double */
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9Le", -83809.234375l);
+  PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9Le", -83809.234375L);
 #endif
 }
 #endif // PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
