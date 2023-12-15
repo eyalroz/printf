@@ -109,7 +109,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(printf PRIVATE /W4)
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
         CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	target_compile_options(printf PRIVATE -Wall -Wextra -pedantic -Wconversion)
+	target_compile_options(printf PRIVATE -Wall -Wextra -pedantic -Wconversion -ansi)
 	if (ALIAS_STANDARD_FUNCTION_NAMES)
 		# This is important for preventing our aliased implementation
 		# from being replaced, e.g. printf("%c", 'a') by putchar('a');
