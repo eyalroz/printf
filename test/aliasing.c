@@ -16,7 +16,8 @@ char buffer[BufferSize];
 
 void putchar_(char c)
 {
-  for(char* ptr = buffer; ptr - buffer < BufferSize; ptr++) {
+  char* ptr;
+  for(ptr = buffer; ptr - buffer < BufferSize; ptr++) {
     if (*ptr == '\0') {
       *ptr++ = c;
       *ptr++ = '\0';
@@ -27,7 +28,8 @@ void putchar_(char c)
 
 void clear_buffer(void)
 {
-  for(int i = 0; i < BufferSize; i++) {
+  int i;
+  for(i = 0; i < BufferSize; i++) {
     buffer[i] = '\0';
   }
 }

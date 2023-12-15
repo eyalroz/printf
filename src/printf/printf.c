@@ -56,6 +56,15 @@
 #include <stdbool.h>
 #endif /* __cplusplus */
 
+#if !(defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L))
+/* C90 */
+#if defined(_MSC_VER)
+#define inline __inline
+#else
+#define inline __inline__
+#endif /* defined(_MSC_VER) */
+#endif /* !(defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)) */
+
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 # define printf_    printf
 # define sprintf_   sprintf
@@ -405,13 +414,14 @@ static inline void putchar_via_gadget(output_gadget_t* gadget, char c)
 /* Possibly-write the string-terminating '\0' character */
 static inline void append_termination_with_gadget(output_gadget_t* gadget)
 {
+  printf_size_t null_char_pos;
   if (gadget->function != NULL || gadget->max_chars == 0) {
     return;
   }
   if (gadget->buffer == NULL) {
     return;
   }
-  printf_size_t null_char_pos = gadget->pos < gadget->max_chars ? gadget->pos : gadget->max_chars - 1;
+  null_char_pos = gadget->pos < gadget->max_chars ? gadget->pos : gadget->max_chars - 1;
   gadget->buffer[null_char_pos] = '\0';
 }
 
@@ -504,7 +514,8 @@ static void out_rev_(output_gadget_t* output, const char* buf, printf_size_t len
 
   /* pad spaces up to given width */
   if (!(flags & FLAGS_LEFT) && !(flags & FLAGS_ZEROPAD)) {
-    for (printf_size_t i = len; i < width; i++) {
+    printf_size_t i;
+    for (i = len; i < width; i++) {
       putchar_via_gadget(output, ' ');
     }
   }
@@ -671,14 +682,17 @@ static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 
 static struct floating_point_components get_components(floating_point_t number, printf_size_t precision)
 {
   struct floating_point_components number_;
+  floating_point_t abs_number;
+  floating_point_t scaled_remainder;
+  floating_point_t remainder;
+  const floating_point_t one_half = (floating_point_t) 0.5;
   number_.is_negative = get_sign_bit(number);
-  floating_point_t abs_number = SIGN(number_.is_negative, number);
+  abs_number = SIGN(number_.is_negative, number);
   number_.integral = (int_fast64_t) abs_number;
-  floating_point_t scaled_remainder = (abs_number - (floating_point_t) number_.integral) * powers_of_10[precision];
+  scaled_remainder = (abs_number - (floating_point_t) number_.integral) * powers_of_10[precision];
   number_.fractional = (int_fast64_t) scaled_remainder; /* for precision == 0U, this will be 0 */
 
-  floating_point_t remainder = scaled_remainder - (floating_point_t) number_.fractional;
-  const floating_point_t one_half = (floating_point_t)  0.5;
+  remainder = scaled_remainder - (floating_point_t) number_.fractional;
 
   if ((remainder > one_half) ||
       /* Banker's rounding, i.e. round half to even: 1.5 -> 2, but 2.5 -> 2 */
@@ -758,10 +772,18 @@ static struct scaling_factor update_normalization(struct scaling_factor sf, floa
 static struct floating_point_components get_normalized_components(bool negative, printf_size_t precision, floating_point_t non_normalized, struct scaling_factor normalization, int floored_exp10)
 {
   struct floating_point_components components;
-  components.is_negative = negative;
-  floating_point_t scaled = apply_scaling(non_normalized, normalization);
+  floating_point_t scaled;
+  bool close_to_representation_extremum;
+  floating_point_t remainder;
+  floating_point_t prec_power_of_10;
+  struct scaling_factor account_for_precision;
+  floating_point_t scaled_remainder;
+  const floating_point_t rounding_threshold = 0.5;
 
-  bool close_to_representation_extremum = ( (-floored_exp10 + (int) precision) >= FP_TYPE_MAX_10_EXP - 1 );
+  components.is_negative = negative;
+  scaled = apply_scaling(non_normalized, normalization);
+
+  close_to_representation_extremum = ( (-floored_exp10 + (int) precision) >= FP_TYPE_MAX_10_EXP - 1 );
   if (close_to_representation_extremum) {
     /*
      * We can't have a normalization factor which also accounts for the precision, i.e. moves
@@ -771,11 +793,10 @@ static struct floating_point_components get_normalized_components(bool negative,
     return get_components(SIGN(negative, scaled), precision);
   }
   components.integral = (int_fast64_t) scaled;
-  floating_point_t remainder = non_normalized - unapply_scaling((floating_point_t) components.integral, normalization);
-  floating_point_t prec_power_of_10 = powers_of_10[precision];
-  struct scaling_factor account_for_precision = update_normalization(normalization, prec_power_of_10);
-  floating_point_t scaled_remainder = apply_scaling(remainder, account_for_precision);
-  floating_point_t rounding_threshold = 0.5;
+  remainder = non_normalized - unapply_scaling((floating_point_t) components.integral, normalization);
+  prec_power_of_10 = powers_of_10[precision];
+  account_for_precision = update_normalization(normalization, prec_power_of_10);
+  scaled_remainder = apply_scaling(remainder, account_for_precision);
 
   components.fractional = (int_fast64_t) scaled_remainder; /* when precision == 0, the assigned value should be 0 */
   scaled_remainder -= (floating_point_t) components.fractional; /* when precision == 0, this will not change scaled_remainder */
@@ -901,8 +922,9 @@ static void print_decimal_number(output_gadget_t* output, floating_point_t numbe
  */
 static int bastardized_floor(floating_point_t x)
 {
+  int n;
   if (x >= 0) { return (int) x; }
-  int n = (int) x;
+  n = (int) x;
   return ( ((floating_point_t) n) == x ) ? n : n-1;
 }
 
@@ -925,10 +947,11 @@ static floating_point_t log10_of_positive(floating_point_t positive_number)
   floating_point_with_bit_access dwba = get_bit_access(positive_number);
   /* based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c) */
   int exp2 = get_exp2(dwba);
+  floating_point_t z;
   /* drop the exponent, so dwba.F comes into the range [1,2) */
   dwba.U = (dwba.U & (((printf_fp_uint_t) (1) << FP_TYPE_STORED_MANTISSA_BITS) - 1U)) |
            ((printf_fp_uint_t) FP_TYPE_BASE_EXPONENT << FP_TYPE_STORED_MANTISSA_BITS);
-  floating_point_t z = (dwba.F - (floating_point_t) 1.5);
+  z = (dwba.F - (floating_point_t) 1.5);
   return (
     /* Taylor expansion around 1.5: */
               (floating_point_t) 0.1760912590556812420 /* Expansion term 0: ln(1.5)            / ln(10) */
@@ -947,15 +970,19 @@ static floating_point_t log10_of_positive(floating_point_t positive_number)
 
 static floating_point_t pow10_of_int(int floored_exp10)
 {
+  floating_point_with_bit_access dwba;
+  int exp2;
+  floating_point_t z;
+  floating_point_t z2;
+
   /* A crude hack for avoiding undesired behavior with barely-normal or slightly-subnormal values. */
   if (floored_exp10 == FP_TYPE_MAX_SUBNORMAL_EXPONENT_OF_10) {
     return FP_TYPE_MAX_SUBNORMAL_POWER_OF_10;
   }
   /* Compute 10^(floored_exp10) but (try to) make sure that doesn't overflow */
-  floating_point_with_bit_access dwba;
-  int exp2 = bastardized_floor(floored_exp10 * (floating_point_t) 3.321928094887362 + (floating_point_t) 0.5);
-  const floating_point_t z  = floored_exp10 * (floating_point_t) 2.302585092994046 - exp2 * (floating_point_t) 0.6931471805599453;
-  const floating_point_t z2 = z * z;
+  exp2 = bastardized_floor(floored_exp10 * (floating_point_t) 3.321928094887362 + (floating_point_t) 0.5);
+  z  = floored_exp10 * (floating_point_t) 2.302585092994046 - exp2 * (floating_point_t) 0.6931471805599453;
+  z2 = z * z;
   dwba.U = ((printf_fp_uint_t)(exp2) + FP_TYPE_BASE_EXPONENT) << FP_TYPE_STORED_MANTISSA_BITS;
   /*
    * compute exp(z) using continued fractions,
@@ -974,6 +1001,12 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
   int floored_exp10;
   bool abs_exp10_covered_by_powers_table;
   struct scaling_factor normalization;
+  struct floating_point_components decimal_part_components;
+  int original_floored_exp10;
+  bool fall_back_to_decimal_only_mode;
+  printf_size_t exp10_part_width;
+  printf_size_t decimal_part_width;
+  printf_size_t printed_exponential_start_pos;
 
 
   /* Determine the decimal exponent */
@@ -983,8 +1016,9 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
   }
   else  {
     floating_point_t exp10 = log10_of_positive(abs_number);
+    floating_point_t p10;
     floored_exp10 = bastardized_floor(exp10);
-    floating_point_t p10 = pow10_of_int(floored_exp10);
+    p10 = pow10_of_int(floored_exp10);
     /* correct for rounding errors */
     if (abs_number < p10) {
       floored_exp10--;
@@ -1029,7 +1063,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-  struct floating_point_components decimal_part_components =
+  decimal_part_components =
     (floored_exp10 == 0) ?
     get_components(SIGN(negative, abs_number), precision) :
     get_normalized_components(negative, precision, abs_number, normalization, floored_exp10);
@@ -1039,7 +1073,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
    * the exponent and may require additional tweaking of the parts
    * (and saving the floored_exp10 in case we'll need to undo the roll-over).
    */
-  int original_floored_exp10 = floored_exp10;
+  original_floored_exp10 = floored_exp10;
   if (decimal_part_components.integral >= 10) {
     floored_exp10++;
     decimal_part_components.integral = 1;
@@ -1050,7 +1084,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
    * Should we want to fall-back to "%f" mode, and only print the decimal part?
    * (and remember we have decreased "precision" by 1
    */
-  bool fall_back_to_decimal_only_mode = (flags & FLAGS_ADAPT_EXP) && (floored_exp10 >= -4) && (floored_exp10 < (int) precision + 1);
+  fall_back_to_decimal_only_mode = (flags & FLAGS_ADAPT_EXP) && (floored_exp10 >= -4) && (floored_exp10 < (int) precision + 1);
 
   if (fall_back_to_decimal_only_mode) {
     precision = ((int) precision > floored_exp10) ? (unsigned) ((int) precision - floored_exp10) : 0U;
@@ -1069,9 +1103,9 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
    * the floored_exp10 format is "E%+03d" and largest possible floored_exp10 value for a 64-bit double
    * is "307" (for 2^1023), so we set aside 4-5 characters overall
    */
-  printf_size_t exp10_part_width = fall_back_to_decimal_only_mode ? 0U : (PRINTF_ABS(floored_exp10) < 100) ? 4U : 5U;
+  exp10_part_width = fall_back_to_decimal_only_mode ? 0U : (PRINTF_ABS(floored_exp10) < 100) ? 4U : 5U;
 
-  printf_size_t decimal_part_width =
+  decimal_part_width =
     ((flags & FLAGS_LEFT) && exp10_part_width) ?
       /*
        * We're padding on the right, so the width constraint is the exponent part's
@@ -1094,7 +1128,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
          */
         0U);
 
-  const printf_size_t printed_exponential_start_pos = output->pos;
+  printed_exponential_start_pos = output->pos;
   print_broken_up_decimal(decimal_part_components, output, precision, decimal_part_width, flags, buf, len);
 
   if (! fall_back_to_decimal_only_mode) {
@@ -1195,6 +1229,9 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 
   while (*format)
   {
+    printf_flags_t flags;
+    printf_size_t width;
+    printf_size_t precision;
     if (*format != '%') {
       /* A regular content character */
       putchar_via_gadget(output, *format);
@@ -1204,10 +1241,10 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
     /* We're parsing a format specifier: %[flags][width][.precision][length] */
     ADVANCE_IN_FORMAT_STRING(format);
 
-    printf_flags_t flags = parse_flags(&format);
+    flags = parse_flags(&format);
 
     /* evaluate width field */
-    printf_size_t width = 0U;
+    width = 0U;
     if (is_digit_(*format)) {
       /*
        * Note: If the width is negative, we've already parsed its
@@ -1228,7 +1265,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
     }
 
     /* evaluate precision field */
-    printf_size_t precision = 0U;
+    precision = 0U;
     if (*format == '.') {
       flags |= FLAGS_PRECISION;
       ADVANCE_IN_FORMAT_STRING(format);
@@ -1325,12 +1362,12 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       case 'X' :
       case 'o' :
       case 'b' : {
+        numeric_base_t base;
 
         if (*format == 'd' || *format == 'i') {
           flags |= FLAGS_SIGNED;
         }
 
-        numeric_base_t base;
         if (*format == 'x' || *format == 'X') {
           base = BASE_HEX;
         }
@@ -1481,9 +1518,10 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       }
 
       case 'p' : {
+        uintptr_t value;
         width = sizeof(void*) * 2U + 2; /* 2 hex chars per byte + the "0x" prefix */
         flags |= FLAGS_ZEROPAD | FLAGS_POINTER;
-        uintptr_t value = (uintptr_t)va_arg(args, void*);
+        value = (uintptr_t)va_arg(args, void*);
         (value == (uintptr_t) NULL) ?
           out_rev_(output, ")lin(", 5, width, flags) :
           print_integer(output, (printf_unsigned_value_t) value, false, BASE_HEX, precision, width, flags);
@@ -1560,43 +1598,48 @@ int vsprintf_(char* s, const char* format, va_list arg)
 
 int vfctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char* format, va_list arg)
 {
+  output_gadget_t gadget;
   if (out == NULL) { return 0; }
-  output_gadget_t gadget = function_gadget(out, extra_arg);
+  gadget = function_gadget(out, extra_arg);
   return vsnprintf_impl(&gadget, format, arg);
 }
 
 int printf_(const char* format, ...)
 {
+  int ret;
   va_list args;
   va_start(args, format);
-  const int ret = vprintf_(format, args);
+  ret = vprintf_(format, args);
   va_end(args);
   return ret;
 }
 
 int sprintf_(char* s, const char* format, ...)
 {
+  int ret;
   va_list args;
   va_start(args, format);
-  const int ret = vsprintf_(s, format, args);
+  ret = vsprintf_(s, format, args);
   va_end(args);
   return ret;
 }
 
 int snprintf_(char* s, size_t n, const char* format, ...)
 {
+  int ret;
   va_list args;
   va_start(args, format);
-  const int ret = vsnprintf_(s, n, format, args);
+  ret = vsnprintf_(s, n, format, args);
   va_end(args);
   return ret;
 }
 
 int fctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char* format, ...)
 {
+  int ret;
   va_list args;
   va_start(args, format);
-  const int ret = vfctprintf(out, extra_arg, format, args);
+  ret = vfctprintf(out, extra_arg, format, args);
   va_end(args);
   return ret;
 }

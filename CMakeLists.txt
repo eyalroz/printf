@@ -42,8 +42,8 @@ foreach(opt
 	USE_DOUBLE_INTERNALLY
 	ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 	ALIAS_STANDARD_FUNCTION_NAMES_HARD
-	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER        
-        )
+	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
+)
 	if (${${opt}})
 		set("PRINTF_${opt}" 1)
 	else()
@@ -112,8 +112,19 @@ set_target_properties(printf PROPERTIES
 if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(printf PRIVATE /W4)
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
-        CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	target_compile_options(printf PRIVATE -Wall -Wextra -pedantic -Wconversion)
+		CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	target_compile_options(printf PRIVATE
+		-Wall
+		-Wextra
+		-pedantic
+		-Wconversion
+		-Werror=declaration-after-statement
+	)
+	if (SUPPORT_LONG_LONG)
+		target_compile_options(printf PRIVATE -Wno-long-long)
+	endif()
+	set_target_properties(printf PROPERTIES C_STANDARD 90)
+	set_target_properties(printf PROPERTIES C_STANDARD_REQUIRED ON)
 	if (ALIAS_STANDARD_FUNCTION_NAMES)
 		# This is important for preventing our aliased implementation
 		# from being replaced, e.g. printf("%c", 'a') by putchar('a');
@@ -201,7 +212,7 @@ write_basic_package_version_file(
 )
 
 install(
-	FILES 
+	FILES
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
 	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
