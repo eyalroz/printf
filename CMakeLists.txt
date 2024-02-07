@@ -22,6 +22,7 @@ option(SUPPORT_WRITEBACK_SPECIFIER            "Support the length write-back spe
 option(SUPPORT_LONG_LONG                      "Support long long integral types (allows for the ll length modifier and affects %p)" ON)
 option(USE_DOUBLE_INTERNALLY                  "Use the C `double` type - typically 64-bit in size - for internal floating-point arithmetic " ON)
 option(CHECK_FOR_NUL_IN_FORMAT_SPECIFIER      "Be defensive in the undefined-behavior case of a format specifier not ending before the string ends" ON)
+option(DISABLE_FORMAT_SPECIFIERS              "Disable format specifiers substitution and just print format strings as standard strings" OFF)
 
 set(ALIASING_MODES NONE HARD SOFT)
 set(ALIAS_STANDARD_FUNCTION_NAMES NONE CACHE STRING "Alias the standard library function names (printf, sprintf etc.) to the library's functions - concretely, via a macro, or not at all")
@@ -42,7 +43,8 @@ foreach(opt
 	USE_DOUBLE_INTERNALLY
 	ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 	ALIAS_STANDARD_FUNCTION_NAMES_HARD
-	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER        
+	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
+	DISABLE_FORMAT_SPECIFIERS
         )
 	if (${${opt}})
 		set("PRINTF_${opt}" 1)
@@ -197,7 +199,7 @@ write_basic_package_version_file(
 )
 
 install(
-	FILES 
+	FILES
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
 	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"

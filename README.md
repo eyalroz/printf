@@ -98,7 +98,8 @@ Options used both in CMake and in the library source code via a preprocessor def
 | SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS  | YES     |  Support the 'I' + bit size integer specifiers (%I8, %I16, %I32, %I64) as in Microsoft Visual C++ |
 | PRINTF_SUPPORT_WRITEBACK_SPECIFIER     | YES     |  Support the length write-back specifier (%n) |
 | PRINTF_SUPPORT_LONG_LONG               | YES     |  Support long long integral types (allows for the ll length modifier and affects %p) |
-| PRINTF_USE_DOUBLE_INTERNALLY           | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type |
+| PRINTF_USE_DOUBLE_INTERNALLY           | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type) |
+| PRINTF_DISABLE_FORMAT_SPECIFIERS       | NO      |  Disable format specifiers substitution and just print format strings as standard strings |
 
 Within CMake, these options lack the `PRINTF_` prefix.
 
@@ -294,4 +295,3 @@ I try to attend to issues and PRs promptly.
 ## License
 
 This library is published under the terms of the [MIT license](http://www.opensource.org/licenses/MIT).
-

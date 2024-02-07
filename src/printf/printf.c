@@ -133,6 +133,11 @@
 #define PRINTF_CHECK_FOR_NUL_IN_FORMAT_SPECIFIER 1
 #endif
 
+// Disable format specifiers substitution and just print format strings as standard strings
+#ifndef PRINTF_DISABLE_FORMAT_SPECIFIERS
+#define PRINTF_DISABLE_FORMAT_SPECIFIERS 0
+#endif
+
 #define PRINTF_PREFER_DECIMAL     false
 #define PRINTF_PREFER_EXPONENTIAL true
 
@@ -1091,6 +1096,8 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 {
 #if PRINTF_CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
 #define ADVANCE_IN_FORMAT_STRING(cptr_) do { (cptr_)++; if (!*(cptr_)) return; } while(0)
+#elif PRINTF_DISABLE_FORMAT_SPECIFIERS
+#define ADVANCE_IN_FORMAT_STRING(cptr_) continue
 #else
 #define ADVANCE_IN_FORMAT_STRING(cptr_) (cptr_)++
 #endif
@@ -1482,4 +1489,3 @@ int fctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char*
   va_end(args);
   return ret;
 }
-
