@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
 static bool parse_options(int argc, char *argv[])
 {
-  char c;
+  int c;
   bool gotopt = false;
 
   opts.i = false;
