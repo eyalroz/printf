@@ -4,6 +4,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/eyalroz/printf/master/LICENSE)
 [![Github Bug-type issues](https://shields.io/github/issues-search/eyalroz/printf?query=is:open%20is:issue%20label:bug&label=open%20bugs)](http://github.com/eyalroz/printf/issues)
 <sup>Parent repository: </sup>[![Github issues (original repo)](https://img.shields.io/github/issues/mpaland/printf.svg)](http://github.com/mpaland/printf/issues)
+<sup>Package managers: </sup>[![hunter](https://img.shields.io/badge/hunter-eyalroz_printf-blue.svg)](https://github.com/cpp-pm/hunter/blob/master/examples/eyalroz_printf/CMakeLists.txt)
 <!-- Can't use Travis - they stopped offering free builds [![Build Status](https://travis-ci.com/eyalroz/printf.svg?branch=master)](https://travis-ci.com/eyalroz/printf) -->
 <!-- No releases yet... [![Github Releases](https://img.shields.io/github/release/eyalroz/printf.svg)](https://github.com/mpaland/eyalroz/releases)-->
 
