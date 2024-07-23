@@ -889,7 +889,7 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
   PRINTING_CHECK("-4e+04",                  ==, sprintf_, buffer, "%.1g", -40661.5);
   PRINTING_CHECK("-4.e+04",                 ==, sprintf_, buffer, "%#.1g", -40661.5);
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3g", 99.998580932617187500);
-  PRINTING_CHECK("1.e01",                   ==, sprintf_, buffer, "%# 01.1g", 9.8);
+  PRINTING_CHECK(" 1.e+01",                 ==, sprintf_, buffer, "%# 01.1g", 9.8);
   // Note: The following value is _barely_ normal; make the mantissa 1.1 and it loses its normality.
   PRINTING_CHECK("1.2345678901e-308",       ==, sprintf_, buffer, "%.10e", 1.2345678901e-308);
   // Rounding-focused checks
