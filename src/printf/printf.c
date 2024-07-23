@@ -922,27 +922,21 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
     normalization.raw_factor = abs_exp10_covered_by_powers_table ? powers_of_10[PRINTF_ABS(floored_exp10)] : p10;
   }
 
+  if (flags & FLAGS_ADAPT_EXP) {
+    // Note: For now, still assuming we _don't_ fall-back to "%f" mode; we can't decide
+    // that until we've established the exact exponent.
+
+    // In "%g" mode, "precision" is the number of _significant digits_; we must
+    // "translate" that  to an actual number of decimal digits.
+    precision = (precision > 1) ? (precision - 1U) : 0U;
+    flags |= FLAGS_PRECISION;   // make sure print_broken_up_decimal respects our choice
+  }
+
   // We now begin accounting for the widths of the two parts of our printed field:
   // the decimal part after decimal exponent extraction, and the base-10 exponent part.
   // For both of these, the value of 0 has a special meaning, but not the same one:
   // a 0 exponent-part width means "don't print the exponent"; a 0 decimal-part width
   // means "use as many characters as necessary".
-
-  bool fall_back_to_decimal_only_mode = false;
-  if (flags & FLAGS_ADAPT_EXP) {
-    int required_significant_digits = (precision == 0) ? 1 : (int) precision;
-    // Should we want to fall-back to "%f" mode, and only print the decimal part?
-    fall_back_to_decimal_only_mode = (floored_exp10 >= -4 && floored_exp10 < required_significant_digits);
-    // Now, let's adjust the precision
-    // This also decided how we adjust the precision value - as in "%g" mode,
-    // "precision" is the number of _significant digits_, and this is when we "translate"
-    // the precision value to an actual number of decimal digits.
-    int precision_ = fall_back_to_decimal_only_mode ?
-                     (int) precision - 1 - floored_exp10 :
-        (int) precision - 1; // the presence of the exponent ensures only one significant digit comes before the decimal point
-    precision = (precision_ > 0 ? (unsigned) precision_ : 0U);
-    flags |= FLAGS_PRECISION;   // make sure print_broken_up_decimal respects our choice above
-  }
 
 #ifdef __GNUC__
 // accounting for a static analysis bug in GCC 6.x and earlier
@@ -957,28 +951,36 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-  bool should_skip_normalization = (fall_back_to_decimal_only_mode || floored_exp10 == 0);
   struct floating_point_components decimal_part_components =
-    should_skip_normalization ?
+    (floored_exp10 == 0) ?
     get_components(negative ? -abs_number : abs_number, precision) :
     get_normalized_components(negative, precision, abs_number, normalization, floored_exp10);
 
   // Account for roll-over, e.g. rounding from 9.99 to 100.0 - which effects
   // the exponent and may require additional tweaking of the parts
+  // (and saving the floored_exp10 in case we'll need to undo the roll-over).
+  int original_floored_exp10 = floored_exp10;
+  if (decimal_part_components.integral >= 10) {
+    floored_exp10++;
+    decimal_part_components.integral = 1;
+    decimal_part_components.fractional = 0;
+  }
+
+  // Should we want to fall-back to "%f" mode, and only print the decimal part?
+  // (and remember we have decreased "precision" by 1
+  bool fall_back_to_decimal_only_mode = (flags & FLAGS_ADAPT_EXP) && (floored_exp10 >= -4) && (floored_exp10 < (int) precision + 1);
+
   if (fall_back_to_decimal_only_mode) {
+    precision = ((int) precision > floored_exp10) ? (unsigned) ((int) precision - floored_exp10) : 0U;
+    // Redo some work :-)
+    floored_exp10 = original_floored_exp10;
+    decimal_part_components = get_components(negative ? -abs_number : abs_number, precision);
     if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == powers_of_10[floored_exp10 + 1]) {
       floored_exp10++; // Not strictly necessary, since floored_exp10 is no longer really used
       if (precision > 0U) { precision--; }
       // ... and it should already be the case that decimal_part_components.fractional == 0
     }
     // TODO: What about rollover strictly within the fractional part?
-  }
-  else {
-    if (decimal_part_components.integral >= 10) {
-      floored_exp10++;
-      decimal_part_components.integral = 1;
-      decimal_part_components.fractional = 0;
-    }
   }
 
   // the floored_exp10 format is "E%+03d" and largest possible floored_exp10 value for a 64-bit double
