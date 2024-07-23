@@ -5,6 +5,8 @@
 PRINTF_TEST_CASE(space_flag)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK(" 42",                     ==, sprintf_, buffer, "% d", 42);
   PRINTING_CHECK("-42",                     ==, sprintf_, buffer, "% d", -42);
   PRINTING_CHECK("   42",                   ==, sprintf_, buffer, "% 5d", 42);
@@ -27,6 +29,8 @@ PRINTF_TEST_CASE(space_flag)
 PRINTF_TEST_CASE(space_flag__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "% s", mkstr("Hello testing"));
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "% u", 1024);
 #ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
@@ -54,6 +58,8 @@ PRINTF_TEST_CASE(space_flag__non_standard_format)
 PRINTF_TEST_CASE(plus_flag)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("+42",                     ==, sprintf_, buffer, "%+d", 42);
   PRINTING_CHECK("-42",                     ==, sprintf_, buffer, "%+d", -42);
   PRINTING_CHECK("  +42",                   ==, sprintf_, buffer, "%+5d", 42);
@@ -80,6 +86,8 @@ PRINTF_TEST_CASE(plus_flag)
 PRINTF_TEST_CASE(plus_flag__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "%+s", mkstr("Hello testing"));
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%+u", 1024);
 #ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
@@ -104,6 +112,8 @@ PRINTF_TEST_CASE(plus_flag__non_standard_format)
 PRINTF_TEST_CASE(zero_flag)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("42",                      ==, sprintf_, buffer, "%0d", 42);
   PRINTING_CHECK("42",                      ==, sprintf_, buffer, "%0ld", 42L);
   PRINTING_CHECK("-42",                     ==, sprintf_, buffer, "%0d", -42);
@@ -122,6 +132,8 @@ PRINTF_TEST_CASE(zero_flag)
 PRINTF_TEST_CASE(minus_flag)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("42",                      ==, sprintf_, buffer, "%-d", 42);
   PRINTING_CHECK("-42",                     ==, sprintf_, buffer, "%-d", -42);
   PRINTING_CHECK("42   ",                   ==, sprintf_, buffer, "%-5d", 42);
@@ -135,6 +147,8 @@ PRINTF_TEST_CASE(minus_flag)
 PRINTF_TEST_CASE(minus_flag_and_non_standard_zero_modifier_for_integers)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("42",                      ==, sprintf_, buffer, "%-0d", 42);
   PRINTING_CHECK("-42",                     ==, sprintf_, buffer, "%-0d", -42);
   PRINTING_CHECK("42   ",                   ==, sprintf_, buffer, "%-05d", 42);
@@ -167,6 +181,8 @@ PRINTF_TEST_CASE(minus_flag_and_non_standard_zero_modifier_for_integers)
 PRINTF_TEST_CASE(sharp_flag)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#o",   0);
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#0o",  0);
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#.0o", 0);
@@ -190,6 +206,8 @@ PRINTF_TEST_CASE(sharp_flag)
 PRINTF_TEST_CASE(sharp_flag__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("0b110",                   ==, sprintf_, buffer, "%#b",    6);
   PRINTING_CHECK("0b11111111",              ==, sprintf_, buffer, "%#010b", 0xff);
   PRINTING_CHECK("0b011111111",             ==, sprintf_, buffer, "%#011b", 0xff);
@@ -204,6 +222,8 @@ PRINTF_TEST_CASE(sharp_flag__non_standard_format)
 PRINTF_TEST_CASE(sharp_flag_with_long_long)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#llo",   (long long) 0);
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#0llo",  (long long) 0);
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%#.0llo", (long long) 0);
@@ -228,6 +248,8 @@ PRINTF_TEST_CASE(sharp_flag_with_long_long)
 PRINTF_TEST_CASE(sharp_flag_with_long_long__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("0b110",                   ==, sprintf_, buffer, "%#llb", (long long) 6);
 }
 
@@ -237,6 +259,8 @@ PRINTF_TEST_CASE(sharp_flag_with_long_long__non_standard_format)
 PRINTF_TEST_CASE(specifier)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "Hello testing");
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "%s", mkstr("Hello testing"));
 
@@ -279,6 +303,8 @@ PRINTF_TEST_CASE(specifier)
 PRINTF_TEST_CASE(width)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "%1s", mkstr("Hello testing"));
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1d", 1024);
   PRINTING_CHECK("-1024",                   ==, sprintf_, buffer, "%1d", -1024);
@@ -308,6 +334,8 @@ PRINTF_TEST_CASE(width)
 PRINTF_TEST_CASE(width_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("               Hello",    ==, sprintf_, buffer, "%20s", mkstr("Hello"));
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%20d", 1024);
   PRINTING_CHECK("               -1024",    ==, sprintf_, buffer, "%20d", -1024);
@@ -343,6 +371,8 @@ PRINTF_TEST_CASE(width_20)
 PRINTF_TEST_CASE(width_asterisk_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("               Hello",    ==, sprintf_, buffer, "%*s", 20, mkstr("Hello"));
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*d", 20, 1024);
   PRINTING_CHECK("               -1024",    ==, sprintf_, buffer, "%*d", 20, -1024);
@@ -372,6 +402,8 @@ PRINTF_TEST_CASE(width_asterisk_20)
 PRINTF_TEST_CASE(width_minus_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello               ",    ==, sprintf_, buffer, "%-20s", mkstr("Hello"));
   PRINTING_CHECK("1024                ",    ==, sprintf_, buffer, "%-20d", 1024);
   PRINTING_CHECK("-1024               ",    ==, sprintf_, buffer, "%-20d", -1024);
@@ -400,6 +432,8 @@ PRINTF_TEST_CASE(width_minus_20)
 PRINTF_TEST_CASE(width_0_minus_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("Hello               ",    ==, sprintf_, buffer, "%0-20s", mkstr("Hello"));
   PRINTING_CHECK("1024                ",    ==, sprintf_, buffer, "%0-20d", 1024);
   PRINTING_CHECK("-1024               ",    ==, sprintf_, buffer, "%0-20d", -1024);
@@ -421,6 +455,8 @@ PRINTF_TEST_CASE(width_0_minus_20)
 PRINTF_TEST_CASE(padding_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%020d", 1024);
   PRINTING_CHECK("-0000000000000001024",    ==, sprintf_, buffer, "%020d", -1024);
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%020i", 1024);
@@ -439,6 +475,8 @@ PRINTF_TEST_CASE(padding_20)
 PRINTF_TEST_CASE(padding_dot_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%.20d", 1024);
   PRINTING_CHECK("-00000000000000001024",   ==, sprintf_, buffer, "%.20d", -1024);
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%.20i", 1024);
@@ -458,6 +496,8 @@ PRINTF_TEST_CASE(padding_dot_20)
 PRINTF_TEST_CASE(padding_sharp_020__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%#020d", 1024);
   PRINTING_CHECK("-0000000000000001024",    ==, sprintf_, buffer, "%#020d", -1024);
   PRINTING_CHECK("00000000000000001024",    ==, sprintf_, buffer, "%#020i", 1024);
@@ -471,6 +511,8 @@ PRINTF_TEST_CASE(padding_sharp_020__non_standard_format)
 PRINTF_TEST_CASE(padding_sharp_020)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("00000000000000000777",    ==, sprintf_, buffer, "%#020o", 511);
   PRINTING_CHECK("00000000037777777001",    ==, sprintf_, buffer, "%#020o", 4294966785U);
   PRINTING_CHECK("0x00000000001234abcd",    ==, sprintf_, buffer, "%#020x", 305441741);
@@ -485,6 +527,8 @@ PRINTF_TEST_CASE(padding_sharp_020)
 PRINTF_TEST_CASE(padding_sharp_20__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%#20d", 1024);
   PRINTING_CHECK("               -1024",    ==, sprintf_, buffer, "%#20d", -1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%#20i", 1024);
@@ -498,6 +542,8 @@ PRINTF_TEST_CASE(padding_sharp_20__non_standard_format)
 PRINTF_TEST_CASE(padding_sharp_20)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("                0777",    ==, sprintf_, buffer, "%#20o", 511);
   PRINTING_CHECK("        037777777001",    ==, sprintf_, buffer, "%#20o", 4294966785U);
   PRINTING_CHECK("          0x1234abcd",    ==, sprintf_, buffer, "%#20x", 305441741);
@@ -510,6 +556,8 @@ PRINTF_TEST_CASE(padding_sharp_20)
 PRINTF_TEST_CASE(padding_20_point_5)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("               01024",    ==, sprintf_, buffer, "%20.5d", 1024);
   PRINTING_CHECK("              -01024",    ==, sprintf_, buffer, "%20.5d", -1024);
   PRINTING_CHECK("               01024",    ==, sprintf_, buffer, "%20.5i", 1024);
@@ -528,6 +576,7 @@ PRINTF_TEST_CASE(padding_20_point_5)
 PRINTF_TEST_CASE(padding_negative_numbers)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
 
 // space padding
   PRINTING_CHECK("-5",                      ==, sprintf_, buffer, "% 1d", -5);
@@ -548,6 +597,7 @@ PRINTF_TEST_CASE(padding_negative_numbers)
 PRINTF_TEST_CASE(float_padding_negative_numbers)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
 
   // space padding
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
@@ -586,6 +636,8 @@ PRINTF_TEST_CASE(float_padding_negative_numbers)
 PRINTF_TEST_CASE(length)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("",                        ==, sprintf_, buffer, "%.0s", mkstr("Hello testing"));
   PRINTING_CHECK("                    ",    ==, sprintf_, buffer, "%20.0s", mkstr("Hello testing"));
   PRINTING_CHECK("",                        ==, sprintf_, buffer, "%.s", mkstr("Hello testing"));
@@ -619,6 +671,8 @@ PRINTF_TEST_CASE(length)
 PRINTF_TEST_CASE(length__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("  ",                      ==, sprintf_, buffer, "%02.0u", 0U);
   PRINTING_CHECK("  ",                      ==, sprintf_, buffer, "%02.0d", 0);
 }
@@ -631,6 +685,7 @@ PRINTF_TEST_CASE(length__non_standard_format)
 PRINTF_TEST_CASE(infinity_and_not_a_number_values)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
 
   // test special-case floats using math.h macros
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
@@ -652,6 +707,8 @@ PRINTF_TEST_CASE(infinity_and_not_a_number_values)
 PRINTF_TEST_CASE(floating_point_specifiers_with_31_to_32_bit_integer_values)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
 #if PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL >= 10
   PRINTING_CHECK("2147483647",              ==, sprintf_, buffer, "%.10f", 2147483647.0); // 2^31 - 1
   PRINTING_CHECK("2147483648",              ==, sprintf_, buffer, "%.10f", 2147483648.0); // 2^31
@@ -676,6 +733,8 @@ PRINTF_TEST_CASE(floating_point_specifiers_with_31_to_32_bit_integer_values)
 PRINTF_TEST_CASE(tiny_floating_point_values)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
 //  boltzman_s_constant = 1.380651569e-23;
 
   PRINTING_CHECK("1e-23",                   ==, sprintf_, buffer, "%.0e",  1.380651569e-23);
@@ -705,6 +764,8 @@ PRINTF_TEST_CASE(tiny_floating_point_values)
 PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   CAPTURE_AND_PRINT(sprintf_, buffer, "%.0f", (double) ((int64_t) 1 * 1000));
   if (PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL < 3) {
     CHECK(!strcmp(buffer, "1e+3"));
@@ -765,6 +826,8 @@ PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
   PRINTING_CHECK("3.1415",                  ==, sprintf_, buffer, "%.4f", 3.1415354);
   PRINTING_CHECK("30343.142",               ==, sprintf_, buffer, "%.3f", 30343.1415354);
@@ -860,6 +923,8 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
 PRINTF_TEST_CASE(integer_types)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("0",                       ==, sprintf_, buffer, "%i", 0);
   PRINTING_CHECK("1234",                    ==, sprintf_, buffer, "%i", 1234);
   PRINTING_CHECK("32767",                   ==, sprintf_, buffer, "%i", 32767);
@@ -904,6 +969,8 @@ PRINTF_TEST_CASE(integer_types)
 PRINTF_TEST_CASE(types__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("1110101001100000",        ==, sprintf_, buffer, "%b", 60000);
   PRINTING_CHECK("101111000110000101001110", ==, sprintf_, buffer, "%lb", 12345678L);
 }
@@ -913,6 +980,7 @@ PRINTF_TEST_CASE(types__non_standard_format)
 PRINTF_TEST_CASE(pointer)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
 
   CAPTURE_AND_PRINT(sprintf_, buffer, "%p", (void *) 0x1234U);
   if (sizeof(void *) == 4U) {
@@ -949,6 +1017,8 @@ PRINTF_TEST_CASE(pointer)
 PRINTF_TEST_CASE(unknown_flag__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("kmarco",                  ==, sprintf_, buffer, "%kmarco", 42, 37);
 }
 
@@ -957,6 +1027,8 @@ PRINTF_TEST_CASE(unknown_flag__non_standard_format)
 PRINTF_TEST_CASE(string_length)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("This",                    ==, sprintf_, buffer, "%.4s", mkstr("This is a test"));
   PRINTING_CHECK("test",                    ==, sprintf_, buffer, "%.4s", mkstr("test"));
   PRINTING_CHECK("123",                     ==, sprintf_, buffer, "%.7s", mkstr("123"));
@@ -975,6 +1047,8 @@ PRINTF_TEST_CASE(string_length)
 PRINTF_TEST_CASE(string_length__non_standard_format)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   DISABLE_WARNING_PUSH
   DISABLE_WARNING_PRINTF_FORMAT
   DISABLE_WARNING_PRINTF_FORMAT_EXTRA_ARGS
@@ -990,6 +1064,7 @@ PRINTF_TEST_CASE(buffer_length)
 {
   char buffer[base_buffer_size];
   int ret;
+  (void) buffer;
 
   CAPTURE_AND_PRINT_WITH_RETVAL(ret, snprintf_, nullptr, 10, "%s", mkstr("Test"));
   CHECK(ret == 4);
@@ -1017,6 +1092,8 @@ PRINTF_TEST_CASE(buffer_length)
 PRINTF_TEST_CASE(misc)
 {
   char buffer[base_buffer_size];
+  (void) buffer;
+
   PRINTING_CHECK("53000atest-20 bit",       ==, sprintf_, buffer, "%u%u%ctest%d %s", 5, 3000, 'a', -20, mkstr("bit"));
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
   PRINTING_CHECK("0.33",                    ==, sprintf_, buffer, "%.*f", 2, 0.33333333);
@@ -1040,6 +1117,8 @@ PRINTF_TEST_CASE(extremal_signed_integer_values)
 {
   char buffer[base_buffer_size];
   char expected[base_buffer_size];
+  (void) buffer;
+  (void) expected;
 
   std::sprintf(expected, "%hhd", std::numeric_limits<char>::max());
   PRINTING_CHECK(expected,                  ==, sprintf_, buffer, "%hhd", std::numeric_limits<char>::max());
@@ -1075,6 +1154,9 @@ PRINTF_TEST_CASE(extremal_unsigned_integer_values)
 {
   char buffer[base_buffer_size];
   char expected[base_buffer_size];
+
+  (void) buffer;
+  (void) expected;
 
   std::sprintf(expected, "%hhu", std::numeric_limits<char unsigned>::max());
   PRINTING_CHECK(expected,                  ==, sprintf_, buffer, "%hhu", std::numeric_limits<char unsigned>::max());

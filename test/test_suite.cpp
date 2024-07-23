@@ -335,6 +335,7 @@ PRINTF_TEST_CASE(vsnprintf_) {
 
 PRINTF_TEST_CASE(writeback_specifier) {
   char buffer[base_buffer_size];
+  (void) buffer; // in case we happen not to use it
 
   struct {
     char char_;
