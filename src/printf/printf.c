@@ -609,9 +609,11 @@ static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 
 #define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_INT64_T - 1)
 
 
-// Break up a floating-point number - which is known to be a finite non-negative number -
-// into its base-10 parts: integral - before the decimal point, and fractional - after it.
-// Taken the precision into account, but does not change it even internally.
+// Break up a non-negative, finite, floating-point number into two integral
+// parts of its decimal representation: The number up to the decimal point,
+// and the number appearing after that point - whose number of digits
+// corresponds to the precision value. Example: The components of 12.621
+// are 12 and 621 for precision 3, or 12 and 62 for precision 2.
 static struct floating_point_components get_components(floating_point_t number, printf_size_t precision)
 {
   struct floating_point_components number_;
@@ -624,18 +626,14 @@ static struct floating_point_components get_components(floating_point_t number, 
   floating_point_t remainder = scaled_remainder - (floating_point_t) number_.fractional;
   const floating_point_t one_half = (floating_point_t)  0.5;
 
-  if (remainder > one_half) {
+  if ((remainder > one_half) ||
+      // Banker's rounding, i.e. round half to even: 1.5 -> 2, but 2.5 -> 2
+      ((remainder == one_half) && (number_.fractional & 1U))) {
     ++number_.fractional;
-    // handle rollover, e.g. case 0.99 with precision 1 is 1.0
-    if ((floating_point_t) number_.fractional >= powers_of_10[precision]) {
-      number_.fractional = 0;
-      ++number_.integral;
-    }
   }
-  else if ((remainder == one_half) && (number_.fractional & 1U)) {
-    // Banker's rounding, i.e. round half to even:
-    // 1.5 -> 2, but 2.5 -> 2
-    ++number_.fractional;
+  if ((floating_point_t) number_.fractional >= powers_of_10[precision]) {
+    number_.fractional = 0;
+    ++number_.integral;
   }
 
   if (precision == 0U) {

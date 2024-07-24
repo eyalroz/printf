@@ -1111,7 +1111,16 @@ PRINTF_TEST_CASE(misc)
   PRINTING_CHECK("0.000000e+00",            ==, sprintf_, buffer, "%e", 0.0);
   PRINTING_CHECK("-0.000000e+00",           ==, sprintf_, buffer, "%e", -0.0);
 #endif
+  // What should we get with  sprintf_(buffer, "%.2f", 0.995) ?
+  // that number cannot be represented as a double, and the closest double
+  // is actually 0.9949999999999999955591... and so on. That should give
+  // us 0.99 as the output.
+  // still, we can't complain about that value being confused with real 0.995, and
+  // so we can't complain if we get the banker's rounding for 0.995 to 1.00 as the
+  // output
+  //PRINTING_CHECK("1.00",                    ==, sprintf_, buffer, "%.2f", 0.995);
 }
+
 
 PRINTF_TEST_CASE(extremal_signed_integer_values)
 {
