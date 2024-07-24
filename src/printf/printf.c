@@ -61,14 +61,14 @@
 # define snprintf_  snprintf
 # define vsnprintf_ vsnprintf
 # define vprintf_   vprintf
-#endif
+#endif // PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 
 
 // 'ntoa' conversion buffer size, this must be big enough to hold one converted
 // numeric number including padded zeros (dynamically created on stack)
 #ifndef PRINTF_INTEGER_BUFFER_SIZE
 #define PRINTF_INTEGER_BUFFER_SIZE    32
-#endif
+#endif // PRINTF_INTEGER_BUFFER_SIZE
 
 // size of the fixed (on-stack) buffer for printing individual decimal numbers.
 // this must be big enough to hold one converted floating-point value including
@@ -223,7 +223,7 @@ typedef long long          printf_signed_value_t;
 #else
 typedef unsigned long printf_unsigned_value_t;
 typedef long          printf_signed_value_t;
-#endif
+#endif // PRINTF_SUPPORT_LONG_LONG
 
 // The printf()-family functions return an `int`; it is therefore
 // unnecessary/inappropriate to use size_t - often larger than int
@@ -240,7 +240,7 @@ typedef unsigned int printf_size_t;
 #include <float.h>
 #if FLT_RADIX != 2
 #error "Non-binary-radix floating-point types are unsupported."
-#endif
+#endif // PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 
 /**
  * This library supports taking float-point arguments up to and including
@@ -284,9 +284,9 @@ typedef uint64_t printf_fp_uint_t;
 #define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  NUM_DECIMAL_DIGITS_IN_INT64_T - 1
 
 
-#else
+#else // FP_TYPE_MANT_DIG is neither 24 nor 53
 #error "Unsupported floating point type configuration"
-#endif
+#endif // FP_TYPE_MANT_DIG
 #define FP_TYPE_STORED_MANTISSA_BITS (FP_TYPE_MANT_DIG - 1)
 
 typedef union {
