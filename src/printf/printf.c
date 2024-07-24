@@ -236,6 +236,8 @@ typedef unsigned int printf_size_t;
   // since INT_MAX is the maximum return value, which excludes the
   // trailing '\0'.
 
+#define SIGN(_negative,_x) ( (_negative) ? -(_x) : (_x))
+
 #if (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 #include <float.h>
 #if FLT_RADIX != 2
@@ -320,7 +322,7 @@ static inline int get_exp2(floating_point_with_bit_access x)
   // special use).
   return (int)((x.U >> FP_TYPE_STORED_MANTISSA_BITS ) & FP_TYPE_EXPONENT_MASK) - FP_TYPE_BASE_EXPONENT;
 }
-#define PRINTF_ABS(_x) ( (_x) > 0 ? (_x) : -(_x) )
+#define PRINTF_ABS(_x) SIGN( (_x) < 0, (_x) )
 
 #endif // (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 
@@ -614,7 +616,7 @@ static struct floating_point_components get_components(floating_point_t number, 
 {
   struct floating_point_components number_;
   number_.is_negative = get_sign_bit(number);
-  floating_point_t abs_number = (number_.is_negative) ? -number : number;
+  floating_point_t abs_number = SIGN(number_.is_negative, number);
   number_.integral = (int_fast64_t) abs_number;
   floating_point_t scaled_remainder = (abs_number - (floating_point_t) number_.integral) * powers_of_10[precision];
   number_.fractional = (int_fast64_t) scaled_remainder; // for precision == 0U, this will be 0
@@ -710,7 +712,7 @@ static struct floating_point_components get_normalized_components(bool negative,
     // We can't have a normalization factor which also accounts for the precision, i.e. moves
     // some decimal digits into the mantissa, since it's unrepresentable, or nearly unrepresentable.
     // So, we'll give up early on getting extra precision...
-    return get_components(negative ? -scaled : scaled, precision);
+    return get_components(SIGN(negative, scaled), precision);
   }
   components.integral = (int_fast64_t) scaled;
   floating_point_t remainder = non_normalized - unapply_scaling((floating_point_t) components.integral, normalization);
@@ -897,7 +899,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 {
   const bool negative = get_sign_bit(number);
   // This number will decrease gradually (by factors of 10) as we "extract" the exponent out of it
-  floating_point_t abs_number =  negative ? -number : number;
+  floating_point_t abs_number =  SIGN(negative, number);
 
   int floored_exp10;
   bool abs_exp10_covered_by_powers_table;
@@ -953,7 +955,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 #endif
   struct floating_point_components decimal_part_components =
     (floored_exp10 == 0) ?
-    get_components(negative ? -abs_number : abs_number, precision) :
+    get_components(SIGN(negative, abs_number), precision) :
     get_normalized_components(negative, precision, abs_number, normalization, floored_exp10);
 
   // Account for roll-over, e.g. rounding from 9.99 to 100.0 - which effects
@@ -974,7 +976,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
     precision = ((int) precision > floored_exp10) ? (unsigned) ((int) precision - floored_exp10) : 0U;
     // Redo some work :-)
     floored_exp10 = original_floored_exp10;
-    decimal_part_components = get_components(negative ? -abs_number : abs_number, precision);
+    decimal_part_components = get_components(SIGN(negative, abs_number), precision);
     if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == powers_of_10[floored_exp10 + 1]) {
       floored_exp10++; // Not strictly necessary, since floored_exp10 is no longer really used
       if (precision > 0U) { precision--; }
