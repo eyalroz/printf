@@ -1097,7 +1097,6 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 #define ADVANCE_IN_FORMAT_STRING(cptr_) (cptr_)++
 #endif
 
-
   while (*format)
   {
     if (*format != '%') {
@@ -1114,6 +1113,8 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
     // evaluate width field
     printf_size_t width = 0U;
     if (is_digit_(*format)) {
+      // Note: If the width is negative, we've already parsed its
+      // sign character '-' as a FLAG_LEFT
       width = (printf_size_t) atou_(&format);
     }
     else if (*format == '*') {
@@ -1133,12 +1134,23 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
     if (*format == '.') {
       flags |= FLAGS_PRECISION;
       ADVANCE_IN_FORMAT_STRING(format);
-      if (is_digit_(*format)) {
-        precision = (printf_size_t) atou_(&format);
+      if (*format == '-') {
+        do {
+          ADVANCE_IN_FORMAT_STRING(format);
+        } while (is_digit_(*format));
+        flags &= ~FLAGS_PRECISION;
+      }
+      else if (is_digit_(*format)) {
+        precision = atou_(&format);
       }
       else if (*format == '*') {
         const int precision_ = va_arg(args, int);
-        precision = precision_ > 0 ? (printf_size_t) precision_ : 0U;
+        if (precision_ < 0) {
+          flags &= ~FLAGS_PRECISION;
+        }
+        else {
+          precision = precision_ > 0 ? (printf_size_t) precision_ : 0U;
+        }
         ADVANCE_IN_FORMAT_STRING(format);
       }
     }
