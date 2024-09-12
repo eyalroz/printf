@@ -31,7 +31,7 @@ Why? Because we already have a mess of 381 forks (!) as of January 2023. Don't m
 
 If you use a typical libc's `sprintf()` implementation (or similar function), you are likely to pull in a *lot* of unwanted library definitions and can bloat code size - typically by as much as 20 KiB. Now, there is a boatload of so called 'tiny' `printf()`-family implementations around. So why this one? Or rather, why [mpaland/printf](https://github.com/mpaland/printf), and then why this fork? 
 
-Well, Marco tried out many of the available `printf()` implementations, but was disappointed: Some are not thread-safe; some have indirect dependencies on libc or other libraries, making them inconvenient to build and larger when compiled; some only offer extremely limited flag and specifier support; and some produce non-standard-compiled output, failing many tests no found in the repository's test suite.
+Well, Marco Paland tried out many of the available `printf()` implementations, but was disappointed: Some are not thread-safe; some have indirect dependencies on libc or other libraries, making them inconvenient to build and larger when compiled; some only offer extremely limited flag and specifier support; and some produce non-standard-compiled output, failing many tests no found in the repository's test suite.
 
 Marco therefore decided to write his own implementation, with the following goals in mind (I've dropped a few relative to his original description):
 
@@ -46,21 +46,23 @@ Marco therefore decided to write his own implementation, with the following goal
 
 Marco's repository upheld most of these goals - but did not quite make it all of the way. As of mid-2021, it still had many C-standard-non-compliance bugs; the test suite was quite lacking in coverage; some goals were simply discarded (like avoiding global/local-static constants) etc. The repository had become quite popular, but unfortunately, Marco had been otherwise preoccupied; he had not really touched the code in the two years prior; many bug reports were pending, and so were many pull requests from eary adopters who had fixed some of the bugs they had encountered.
 
-The author of this fork was one of the lateromer bug-reporters-and-PR-authors; and when noticing nothing was moving forward, decided to take up the same goals (sans the discarded ones); and integrate the existing forks and available PRs into a single "consensus fork" which would continue where Marco had left off. Along the way, numerous other issues were observed; the build system was improved; the test suite streamlined and expanded; and other contributors also lent a hand (especially [@mickjc750](https://github.com/mickjc750/)). We are now very close to fully realizing the project goals.
+The author/maintainer of this fork, Eyal, was one of the latecoming bug-reporters-and-PR-authors; and when noticing nothing was moving forward, decided to take up the same goals (sans the discarded ones); and integrate the existing forks and available PRs into a single "consensus fork" which would continue where Marco had left off. Along the way, numerous other issues and bugs were observed; the build system was improved; the test suite streamlined and expanded; and other contributors also lent a hand (especially [@mickjc750](https://github.com/mickjc750/)). We are now very close to fully realizing the project goals.
 
 ## Using the `printf` library in your project
 
+There are multiple alternative ways to use `printf` in your own project; the bulleted items below are never _consecutive_, only _alternative_.
+
 **Use involving CMake:**
 
-1. Use CMake to configure, build and install the library. Then, in another CMake project, use `find_package(printf)` and make sure the library's install location is in CMake's package search path.
-2. Use CMake to configure and build the library. This results in the following files:
+* Use CMake to configure, build and install the library. Then, in another CMake project, use `find_package(printf)` and make sure the library's install location is in CMake's package search path.
+* Use CMake to configure and build the library. This results in the following files:
 
    * An object code library file (named `printf.a`, or `printf.so`, or `printf.dll` depending on your platform and choice of static vs dynamic linking)
    * A header file named `printf.h`
    * (Not strictly necessary) An optional extra header file `printf_config.h` with the build configuration details.
 
    Now, in your project, include `printf.h` and link against the library file, you're all set: There are no dependencies to satisfy or keep track of. 
-3. Use CMake's `FetchContent` module to obtain the project source code and make it part of your own project's build, e.g.:
+* Use CMake's `FetchContent` module to obtain the project source code and make it part of your own project's build, e.g.:
    ```
    FetchContent_Declare(printf_library
        GIT_REPOSITORY https://github.com/eyalroz/printf.git
@@ -71,8 +73,8 @@ The author of this fork was one of the lateromer bug-reporters-and-PR-authors; a
 
 **Use not involving CMake:**
 
-4. Copy `printf.c` and `printf.h` into your own project, and compile the source however you see fit. Remember that the library requires compilation with the C99 language standard enabled.
-5. Include the contents of `printf.c` into your own code - which can be either C or C++. Remember, though, the library is written in the "intersection" of C99 and C++11, so older-standard C programs may not just accept it.
+* Copy `printf.c` and `printf.h` into your own project, and compile the source however you see fit. Remember that the library requires compilation with the C99 language standard enabled.
+* Include the contents of `printf.c` into your own code - which can be either C or C++. Remember, though, the library is written in the "intersection" of C99 and C++11, so older-standard C programs may not just accept it.
 
 Whichever way you choose to use the library:
 
