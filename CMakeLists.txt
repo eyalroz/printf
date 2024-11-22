@@ -81,12 +81,16 @@ add_library(printf)
 
 add_library("printf::printf" ALIAS printf)
 
-
 set(GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 configure_file("printf_config.h.in" "${GENERATED_INCLUDE_DIR}/printf_config.h" @ONLY)
 target_sources(printf PRIVATE src/printf/printf.c "${GENERATED_INCLUDE_DIR}/printf_config.h" src/printf/printf.h)
 target_compile_definitions(printf PRIVATE PRINTF_INCLUDE_CONFIG_H)
 target_include_directories(printf PRIVATE "$<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>")
+
+if (BUILD_SHARED_LIBS)
+	set_property(TARGET printf PROPERTY VERSION ${PROJECT_VERSION})
+	set_property(TARGET printf PROPERTY SOVERSION ${PROJECT_VERSION})
+endif()
 
 set_property(TARGET printf PROPERTY C_STANDARD 99)
 set_property(TARGET printf PROPERTY C_STANDARD_REQUIRED ON)
