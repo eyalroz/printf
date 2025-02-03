@@ -39,6 +39,10 @@
 #ifndef PRINTF_H_
 #define PRINTF_H_
 
+#if PRINTF_INCLUDE_CONFIG_H
+#include "printf_config.h"
+#endif
+
 #ifdef __cplusplus
 # include <cstdarg>
 # include <cstddef>
