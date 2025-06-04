@@ -207,6 +207,15 @@
 
 #endif // PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 
+// Compiling with FORTIFY will redefine the nprintf functions invocations first
+// call into length checking wrapper functions, but those macros shouldn't be
+// defined when compiling actual implementations of printf.
+#ifdef snprintf
+#undef snprintf
+#endif
+#ifdef vsnprintf
+#undef vsnprintf
+#endif
 
 typedef unsigned int printf_flags_t;
 
