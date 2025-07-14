@@ -1,0 +1,24 @@
+{
+  "name": "printf",
+  "version": "0.6.3",
+  "description": "Standalone printf/sprintf formatted printing function library",
+  "keywords": "printf, sprintf, vprintf, vsprintf, vsprintf, vsnprintf, self-contained, standalone, custom-printf, text-formatting, formatted-printing",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eyalroz/printf.git"
+  },
+  "authors": [
+    {
+      "name": "Eyal Rozenberg",
+      "email": "eyalroz1@gmx.com",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/eyalroz/printf",
+  "frameworks": "*",
+  "platforms": "*",
+  "export": {
+    "include": ["src", "CMakeLists.txt", "cmake", "printf_config.h.in"]
+  }
+}
