@@ -150,7 +150,7 @@
 #define PRINTF_PREFER_DECIMAL     false
 #define PRINTF_PREFER_EXPONENTIAL true
 
-///////////////////////////////////////////////////////////////////////////////
+/*===========================================================================*/
 
 /* The following will convert the number-of-digits into an exponential-notation literal */
 #define PRINTF_CONCATENATE(s1, s2) s1##s2
@@ -778,7 +778,7 @@ static struct floating_point_components get_normalized_components(bool negative,
   floating_point_t rounding_threshold = 0.5;
 
   components.fractional = (int_fast64_t) scaled_remainder; /* when precision == 0, the assigned value should be 0 */
-  scaled_remainder -= (floating_point_t) components.fractional; //when precision == 0, this will not change scaled_remainder
+  scaled_remainder -= (floating_point_t) components.fractional; /* when precision == 0, this will not change scaled_remainder */
 
   components.fractional += (scaled_remainder >= rounding_threshold);
   if (scaled_remainder == rounding_threshold) {
@@ -931,7 +931,7 @@ static floating_point_t log10_of_positive(floating_point_t positive_number)
   floating_point_t z = (dwba.F - (floating_point_t) 1.5);
   return (
     /* Taylor expansion around 1.5: */
-              (floating_point_t) 0.1760912590556812420           /* Expansion term 0: ln(1.5)            / ln(10) */
+              (floating_point_t) 0.1760912590556812420 /* Expansion term 0: ln(1.5)            / ln(10) */
     + z     * (floating_point_t) 0.2895296546021678851 /* Expansion term 1: (M - 1.5)   * 2/3  / ln(10) */
 #if PRINTF_LOG10_TAYLOR_TERMS > 2
     - z*z   * (floating_point_t) 0.0965098848673892950 /* Expansion term 2: (M - 1.5)^2 * 2/9  / ln(10) */
@@ -1481,7 +1481,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       }
 
       case 'p' : {
-        width = sizeof(void*) * 2U + 2; // 2 hex chars per byte + the "0x" prefix
+        width = sizeof(void*) * 2U + 2; /* 2 hex chars per byte + the "0x" prefix */
         flags |= FLAGS_ZEROPAD | FLAGS_POINTER;
         uintptr_t value = (uintptr_t)va_arg(args, void*);
         (value == (uintptr_t) NULL) ?
@@ -1539,7 +1539,7 @@ static int vsnprintf_impl(output_gadget_t* output, const char* format, va_list a
   return (int)output->pos;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/*===========================================================================*/
 
 int vprintf_(const char* format, va_list arg)
 {

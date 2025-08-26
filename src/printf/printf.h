@@ -135,12 +135,12 @@ void putchar_(char c);
  * @return The number of characters written into @p s, not counting the
  *     terminating null character
  */
- ///@{
+/* @{ */
 PRINTF_VISIBILITY
 int printf_(const char* format, ...) ATTR_PRINTF(1, 2);
 PRINTF_VISIBILITY
 int vprintf_(const char* format, va_list arg) ATTR_VPRINTF(1);
-///@}
+/* @} */
 
 
 /**
@@ -159,12 +159,12 @@ int vprintf_(const char* format, va_list arg) ATTR_VPRINTF(1);
  * @return The number of characters written into @p s, not counting the
  *     terminating null character
  */
-///@{
+/* @{ */
 PRINTF_VISIBILITY
 int  sprintf_(char* s, const char* format, ...) ATTR_PRINTF(2, 3);
 PRINTF_VISIBILITY
 int vsprintf_(char* s, const char* format, va_list arg) ATTR_VPRINTF(2);
-///@}
+/* @} */
 
 
 /**
@@ -187,12 +187,12 @@ int vsprintf_(char* s, const char* format, va_list arg) ATTR_VPRINTF(2);
  *     and less than @p n, the null-terminated string has been fully and
  *     successfully printed.
  */
-///@{
+/* @{ */
 PRINTF_VISIBILITY
 int  snprintf_(char* s, size_t count, const char* format, ...) ATTR_PRINTF(3, 4);
 PRINTF_VISIBILITY
 int vsnprintf_(char* s, size_t count, const char* format, va_list arg) ATTR_VPRINTF(3);
-///@}
+/* @} */
 
 /**
  * printf/vprintf with user-specified output function
@@ -218,7 +218,7 @@ PRINTF_VISIBILITY
 int vfctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char* format, va_list arg) ATTR_VPRINTF(3);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
