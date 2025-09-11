@@ -883,8 +883,8 @@ static floating_point_t pow10_of_int(int floored_exp10)
   }
   // Compute 10^(floored_exp10) but (try to) make sure that doesn't overflow
   floating_point_with_bit_access dwba;
-  int exp2 = bastardized_floor((floating_point_t) (floored_exp10 * 3.321928094887362 + 0.5));
-  const floating_point_t z  = (floating_point_t) (floored_exp10 * 2.302585092994046 - exp2 * 0.6931471805599453);
+  int exp2 = bastardized_floor(floored_exp10 * (floating_point_t) 3.321928094887362 + (floating_point_t) 0.5);
+  const floating_point_t z  = floored_exp10 * (floating_point_t) 2.302585092994046 - exp2 * (floating_point_t) 0.6931471805599453;
   const floating_point_t z2 = z * z;
   dwba.U = ((printf_fp_uint_t)(exp2) + FP_TYPE_BASE_EXPONENT) << FP_TYPE_STORED_MANTISSA_BITS;
   // compute exp(z) using continued fractions,
