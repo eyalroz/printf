@@ -59,9 +59,9 @@ There are multiple alternative ways to use `printf` in your own project; the bul
 
    * An object code library file (named `printf.a`, or `printf.so`, or `printf.dll` depending on your platform and choice of static vs dynamic linking)
    * A header file named `printf.h`
-   * (Not strictly necessary) An optional extra header file `printf_config.h` with the build configuration details.
+   * (Not strictly necessary) An optional extra header file `printf_config.h` with the build configuration details. If you don't use it, you just need to set some preprocessor definitions in your build configurations`
 
-   Now, in your project, include `printf.h` and link against the library file, you're all set: There are no dependencies to satisfy or keep track of. 
+   Now, in your project, include `printf_config.h` and `printf.h`, and link against the library file, you're all set: There are no dependencies to satisfy or keep track of. 
 * Use CMake's `FetchContent` module to obtain the project source code and make it part of your own project's build, e.g.:
    ```
    FetchContent_Declare(printf_library
@@ -73,8 +73,8 @@ There are multiple alternative ways to use `printf` in your own project; the bul
 
 **Use not involving CMake:**
 
-* Copy `printf.c` and `printf.h` into your own project, and compile the source however you see fit.
-* Include the contents of `printf.c` into your own code - which can be either C or C++
+* Copy `printf.c` and `printf.h` into your own project, and compile the source however you see fit (you may want to set some preprocessor definitions for feature selection etc.).
+* Include the contents of `printf.c` into your own code - which can be either C or C++.
 
 Whichever way you choose to use the library:
 
@@ -117,7 +117,7 @@ Source-only options:
 |----------------------------------------|---------|--------------|
 | PRINTF_INCLUDE_CONFIG_H                | NO      |  Triggers inclusing by `printf.c` of a "printf_config.h" file, which in turn contains the values of all of the CMake-and-preprocessor options above. A CMake build of the library uses this mechanism to apply the user's choice of options, so it can't have the mechanism itself as an option. |
 
-Note: The preprocessor definitions are taken into account when compiling `printf.c`, _not_ when using the compiled library by including `printf.h`.
+Note: The preprocessor definitions are taken into account mostly when compiling `printf.c`.
 
 
 ### Reducing compiled code size
