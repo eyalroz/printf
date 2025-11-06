@@ -507,7 +507,7 @@ static printf_size_t atou_(const char** str)
 }
 
 
-/* output the specified string in reverse, taking care of any zero-padding */
+/* output the specified string in reverse, applying space-padding if necessary */
 static void out_rev_(output_gadget_t* output, const char* buf, printf_size_t len, printf_size_t width, printf_flags_t flags)
 {
   const printf_size_t start_pos = output->pos;
@@ -1518,13 +1518,15 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       }
 
       case 'p' : {
-        uintptr_t value;
-        width = sizeof(void*) * 2U + 2; /* 2 hex chars per byte + the "0x" prefix */
-        flags |= FLAGS_ZEROPAD | FLAGS_POINTER;
-        value = (uintptr_t)va_arg(args, void*);
-        (value == (uintptr_t) NULL) ?
-          out_rev_(output, ")lin(", 5, width, flags) :
+        uintptr_t value = (uintptr_t)va_arg(args, void*);
+        if (value == (uintptr_t) NULL) {
+          out_rev_(output, ")lin(", 5, width, flags);
+        }
+        else {
+          flags |= FLAGS_ZEROPAD | FLAGS_POINTER;
+          width = ((width > 0) ? width : (sizeof(void*) * 2U)) + 2U; /* 2 hex chars per byte + the "0x" prefix */
           print_integer(output, (printf_unsigned_value_t) value, false, BASE_HEX, precision, width, flags);
+        }
         format++;
         break;
       }

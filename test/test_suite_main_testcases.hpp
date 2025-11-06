@@ -1009,7 +1009,9 @@ PRINTF_TEST_CASE(pointer)
   } else {
     CHECK(!strcmp(buffer, "0xffffffff"));
   }
+  PRINTING_CHECK("0x0ff",                   ==, sprintf_, buffer, "%3p", (const void *) 0xff);
   PRINTING_CHECK("(nil)",                   ==, sprintf_, buffer, "%p", (const void *) NULL);
+  PRINTING_CHECK("   (nil)",                ==, sprintf_, buffer, "%8p", (const void *) NULL);
 }
 
 #ifdef TEST_WITH_NON_STANDARD_FORMAT_STRINGS
