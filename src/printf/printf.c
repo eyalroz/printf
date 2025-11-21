@@ -187,10 +187,9 @@
 #define FLAGS_LONG_DOUBLE (1U << 15U)
   /* Only used with PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS */
 
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 
 #define FLAGS_INT8 FLAGS_CHAR
-
 
 #if   (SHRT_MAX   == 32767LL)
 #define FLAGS_INT16       FLAGS_SHORT
@@ -1292,7 +1291,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 
     /* evaluate length field */
     switch (*format) {
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
       case 'I' : {
         ADVANCE_IN_FORMAT_STRING(format);
         /* Greedily parse for size in bits: 8, 16, 32 or 64 */
