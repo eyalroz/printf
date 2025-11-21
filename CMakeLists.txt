@@ -92,7 +92,11 @@ if (BUILD_SHARED_LIBS)
 	set_property(TARGET printf PROPERTY SOVERSION ${PROJECT_VERSION})
 endif()
 
-set_property(TARGET printf PROPERTY C_STANDARD 99)
+if (SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS)
+	set_property(TARGET printf PROPERTY C_STANDARD 99)
+else()
+	set_property(TARGET printf PROPERTY C_STANDARD 90)
+endif()
 set_property(TARGET printf PROPERTY C_STANDARD_REQUIRED ON)
 set_property(TARGET printf PROPERTY C_EXTENSIONS OFF)
 
@@ -110,6 +114,8 @@ set_target_properties(printf PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+	# MSVC won't accept C90
+	set_property(TARGET printf PROPERTY C_STANDARD 99)
 	target_compile_options(printf PRIVATE /W4)
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -121,10 +127,9 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
 		-Werror=declaration-after-statement
 	)
 	if (SUPPORT_LONG_LONG)
+		# long long types are available since C99, not C90
 		target_compile_options(printf PRIVATE -Wno-long-long)
 	endif()
-	set_target_properties(printf PROPERTIES C_STANDARD 90)
-	set_target_properties(printf PROPERTIES C_STANDARD_REQUIRED ON)
 	if (ALIAS_STANDARD_FUNCTION_NAMES)
 		# This is important for preventing our aliased implementation
 		# from being replaced, e.g. printf("%c", 'a') by putchar('a');
