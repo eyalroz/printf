@@ -102,6 +102,7 @@ Options used both in CMake and in the library source code via a preprocessor def
 | PRINTF_SUPPORT_WRITEBACK_SPECIFIER     | YES     |  Support the length write-back specifier (%n) |
 | PRINTF_SUPPORT_LONG_LONG               | YES     |  Support long long integral types (allows for the ll length modifier and affects %p) |
 | PRINTF_USE_DOUBLE_INTERNALLY           | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type |
+| PRINTF_PROVIDE_PLAIN_PRINTF            | YES     | Provide the plain printf() and vprintf() functions, requiring a putchar_() primitive |
 
 Within CMake, these options lack the `PRINTF_` prefix.
 
@@ -115,7 +116,7 @@ Source-only options:
 
 | Option name                            | Default | Description  |
 |----------------------------------------|---------|--------------|
-| PRINTF_INCLUDE_CONFIG_H                | NO      |  Triggers inclusing by `printf.c` of a "printf_config.h" file, which in turn contains the values of all of the CMake-and-preprocessor options above. A CMake build of the library uses this mechanism to apply the user's choice of options, so it can't have the mechanism itself as an option. |
+| PRINTF_INCLUDE_CONFIG_H                | NO      |  Triggers including by `printf.c` of a "printf_config.h" file, which in turn contains the values of all of the CMake-and-preprocessor options above. A CMake build of the library uses this mechanism to apply the user's choice of options, so it can't have the mechanism itself as an option. |
 
 Note: The preprocessor definitions are taken into account mostly when compiling `printf.c`.
 
