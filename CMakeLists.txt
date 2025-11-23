@@ -22,6 +22,7 @@ option(SUPPORT_WRITEBACK_SPECIFIER            "Support the length write-back spe
 option(SUPPORT_LONG_LONG                      "Support long long integral types (allows for the ll length modifier and affects %p)" ON)
 option(USE_DOUBLE_INTERNALLY                  "Use the C `double` type - typically 64-bit in size - for internal floating-point arithmetic " ON)
 option(CHECK_FOR_NUL_IN_FORMAT_SPECIFIER      "Be defensive in the undefined-behavior case of a format specifier not ending before the string ends" ON)
+option(PROVIDE_PLAIN_PRINTF                   "Provide the plain printf() and vprintf() functions, requiring a putchar_() primitive" ON)
 
 set(ALIASING_MODES NONE HARD SOFT)
 set(ALIAS_STANDARD_FUNCTION_NAMES NONE CACHE STRING "Alias the standard library function names (printf, sprintf etc.) to the library's functions - concretely, via a macro, or not at all")
@@ -43,6 +44,7 @@ foreach(opt
 	ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 	ALIAS_STANDARD_FUNCTION_NAMES_HARD
 	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
+    PROVIDE_PLAIN_PRINTF
 )
 	if (${${opt}})
 		set("PRINTF_${opt}" 1)
@@ -83,7 +85,10 @@ add_library("printf::printf" ALIAS printf)
 
 set(GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 configure_file("printf_config.h.in" "${GENERATED_INCLUDE_DIR}/printf_config.h" @ONLY)
-target_sources(printf PRIVATE src/printf/printf.c "${GENERATED_INCLUDE_DIR}/printf_config.h" src/printf/printf.h)
+target_sources(printf PRIVATE src/printf/printf_core.c "${GENERATED_INCLUDE_DIR}/printf_config.h" src/printf/internal.h src/printf/printf.h)
+if(PROVIDE_PLAIN_PRINTF)
+    target_sources(printf PRIVATE src/printf/printf.c)
+endif()
 target_compile_definitions(printf PRIVATE PRINTF_INCLUDE_CONFIG_H)
 target_include_directories(printf PRIVATE "$<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>")
 
@@ -162,7 +167,7 @@ if (UNIX)
 		COMMAND objdump --disassemble --line-numbers -S "$<TARGET_FILE:printf>" > printf.list
 		DEPENDS printf
 		BYPRODUCTS printf.lst
-		COMMENT Dissassembles the compiled library into an .lst file)
+		COMMENT Disassembles the compiled library into an .lst file)
 
 endif()
 
@@ -186,6 +191,7 @@ install(
 
 install(
 	FILES "src/printf/printf.h"
+	FILES "${GENERATED_INCLUDE_DIR}/printf_config.h"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/printf"
 )
 

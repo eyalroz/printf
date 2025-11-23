@@ -75,6 +75,10 @@ ATTR_PRINTF((one_based_format_index), 0)
 #define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD 0
 #endif
 
+#ifndef PRINTF_PROVIDE_PLAIN_PRINTF
+#define PRINTF_PROVIDE_PLAIN_PRINTF 0
+#endif
+
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 # define printf_    printf
 # define sprintf_   sprintf
@@ -94,6 +98,7 @@ ATTR_PRINTF((one_based_format_index), 0)
 #define PRINTF_VISIBILITY
 #endif
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF == 0
 /**
  * Prints/send a single character to some opaque output entity
  *
@@ -142,6 +147,7 @@ PRINTF_VISIBILITY
 int vprintf_(const char* format, va_list arg) ATTR_VPRINTF(1);
 /* @} */
 
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 /**
  * An implementation of the C standard's sprintf/vsprintf
