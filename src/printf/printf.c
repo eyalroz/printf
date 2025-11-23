@@ -428,6 +428,7 @@ static inline void append_termination_with_gadget(output_gadget_t* gadget)
   gadget->buffer[null_char_pos] = '\0';
 }
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF
 /*
  * We can't use putchar_ as is, since our output gadget
  * only takes pointers to functions with an extra argument
@@ -437,6 +438,7 @@ static inline void putchar_wrapper(char c, void* unused)
   (void) unused;
   putchar_(c);
 }
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 static inline output_gadget_t discarding_gadget(void)
 {
@@ -470,10 +472,12 @@ static inline output_gadget_t function_gadget(void (*function)(char, void*), voi
   return result;
 }
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF
 static inline output_gadget_t extern_putchar_gadget(void)
 {
   return function_gadget(putchar_wrapper, NULL);
 }
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 /*
  * internal secure strlen
@@ -1592,11 +1596,13 @@ static int vsnprintf_impl(output_gadget_t* output, const char* format, va_list a
 
 /*===========================================================================*/
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF
 int vprintf_(const char* format, va_list arg)
 {
   output_gadget_t gadget = extern_putchar_gadget();
   return vsnprintf_impl(&gadget, format, arg);
 }
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 int vsnprintf_(char* s, size_t n, const char* format, va_list arg)
 {
@@ -1617,6 +1623,7 @@ int vfctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char
   return vsnprintf_impl(&gadget, format, arg);
 }
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF
 int printf_(const char* format, ...)
 {
   int ret;
@@ -1626,6 +1633,7 @@ int printf_(const char* format, ...)
   va_end(args);
   return ret;
 }
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 int sprintf_(char* s, const char* format, ...)
 {

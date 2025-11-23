@@ -15,6 +15,7 @@ option(BUILD_SHARED_LIBS    "Build the library as a shared (dynamically-linked) 
 
 # Boolean options which go into config.h
 
+option(PROVIDE_PLAIN_PRINTF                   "Provide the plain printf() and vprintf() functions, requiring a putchar_() primitive" ON)
 option(SUPPORT_DECIMAL_SPECIFIERS             "Support decimal notation floating-point conversion specifiers (%f,%F)" ON)
 option(SUPPORT_EXPONENTIAL_SPECIFIERS         "Support exponential floating point format conversion specifiers (%e,%E,%g,%G)" ON)
 option(SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS  "Support the I + bit size integer specifiers (%I8, %I16, %I32, %I64) as in Microsoft Visual C++" ON)
@@ -34,6 +35,7 @@ if (NOT ${ALIAS_STANDARD_FUNCTION_NAMES} STREQUAL NONE)
 endif()
 
 foreach(opt
+	PROVIDE_PLAIN_PRINTF
 	SUPPORT_DECIMAL_SPECIFIERS
 	SUPPORT_EXPONENTIAL_SPECIFIERS
 	SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS

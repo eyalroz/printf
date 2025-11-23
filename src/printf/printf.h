@@ -76,6 +76,11 @@ ATTR_PRINTF((one_based_format_index), 0)
 # define vprintf_   vprintf
 #endif
 
+/* Provide the basic printf() and vprintf() functions */
+#ifndef PRINTF_PROVIDE_PLAIN_PRINTF
+#define PRINTF_PROVIDE_PLAIN_PRINTF 1
+#endif
+
 /*
  * If you want to include this implementation file directly rather than
  * link against it, this will let you control the functions' visibility,
@@ -86,6 +91,7 @@ ATTR_PRINTF((one_based_format_index), 0)
 #define PRINTF_VISIBILITY
 #endif
 
+#if PRINTF_PROVIDE_PLAIN_PRINTF
 /**
  * Prints/send a single character to some opaque output entity
  *
@@ -133,6 +139,7 @@ int printf_(const char* format, ...) ATTR_PRINTF(1, 2);
 PRINTF_VISIBILITY
 int vprintf_(const char* format, va_list arg) ATTR_VPRINTF(1);
 /* @} */
+#endif /* PRINTF_PROVIDE_PLAIN_PRINTF */
 
 
 /**
