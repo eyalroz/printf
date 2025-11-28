@@ -91,33 +91,31 @@ Options used both in CMake and in the library source code via a preprocessor def
 
 | Option name                            | Default | Description  |
 |----------------------------------------|---------|--------------|
-| PRINTF_ALIAS_STANDARD_FUNCTION_NAMES   | NONE    |  Alias the standard library function names (`printf()`, `sprintf()` etc.) to the library's functions.<br>The possible values are `NONE`, `SOFT` and `HARD`. With Soft aliasing, the library's object files contain symbols which do not clash with the standard library's: `printf_`, `sprintd_` etc; and a macro in `printf.h` replaces usages of `printf()`, `sprintf()` etc. with the underscored versions. With Hard aliasing, no such macro is used, and the library's object files contain `printf`, `sprintf` etc. - and thus cannot be linked together with a full-fledged standard library.  **Note:** The preprocessort definitions `#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT` and `#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD` should be defined to have the same values when using the library as when having compiled the list. |
-| PRINTF_INTEGER_BUFFER_SIZE             | 32      |  ntoa (integer) conversion buffer size. This must be big enough to hold one converted numeric number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
-| PRINTF_DECIMAL_BUFFER_SIZE             | 32      |  ftoa (float) conversion buffer size. This must be big enough to hold one converted float number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
-| PRINTF_DEFAULT_FLOAT_PRECISION         | 6       |  Define the default floating point precision digits |
-| PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL | 9       |  Maximum number of integral-part digits of a floating-point value for which printing with %f uses decimal (non-exponential) notation |
-| PRINTF_SUPPORT_DECIMAL_SPECIFIERS      | YES     |  Support decimal notation floating-point conversion specifiers (%f, %F) |
-| PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS  | YES     |  Support exponential floating point format conversion specifiers (%e, %E, %g, %G) |
+| ALIAS_STANDARD_FUNCTION_NAMES          | NONE    |  Alias the standard library function names (`printf()`, `sprintf()` etc.) to the library's functions.<br>The possible values are `NONE`, `SOFT` and `HARD`. With Soft aliasing, the library's object files contain symbols which do not clash with the standard library's: `printf_`, `sprintd_` etc; and a macro in `printf.h` replaces usages of `printf()`, `sprintf()` etc. with the underscored versions. With Hard aliasing, no such macro is used, and the library's object files contain `printf`, `sprintf` etc. - and thus cannot be linked together with a full-fledged standard library.  **Note:** The preprocessort definitions `#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT` and `#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD` should be defined to have the same values when using the library as when having compiled the list. |
+| INTEGER_BUFFER_SIZE                    | 32      |  ntoa (integer) conversion buffer size. This must be big enough to hold one converted numeric number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
+| DECIMAL_BUFFER_SIZE                    | 32      |  ftoa (float) conversion buffer size. This must be big enough to hold one converted float number _including_ leading zeros, normally 32 is a sufficient value. Created on the stack. |
+| DEFAULT_FLOAT_PRECISION                | 6       |  Define the default floating point precision digits |
+| MAX_INTEGRAL_DIGITS_FOR_DECIMAL        | 9       |  Maximum number of integral-part digits of a floating-point value for which printing with %f uses decimal (non-exponential) notation |
+| SUPPORT_DECIMAL_SPECIFIERS             | YES     |  Support decimal notation floating-point conversion specifiers (%f, %F) |
+| SUPPORT_EXPONENTIAL_SPECIFIERS         | YES     |  Support exponential floating point format conversion specifiers (%e, %E, %g, %G) |
 | SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS  | YES     |  Support the 'I' + bit size integer specifiers (%I8, %I16, %I32, %I64) as in Microsoft Visual C++ |
-| PRINTF_SUPPORT_WRITEBACK_SPECIFIER     | YES     |  Support the length write-back specifier (%n) |
-| PRINTF_SUPPORT_LONG_LONG               | YES     |  Support long long integral types (allows for the ll length modifier and affects %p) |
-| PRINTF_USE_DOUBLE_INTERNALLY           | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type |
+| SUPPORT_WRITEBACK_SPECIFIER            | YES     |  Support the length write-back specifier (%n) |
+| SUPPORT_LONG_LONG                      | YES     |  Support long long integral types (allows for the ll length modifier and affects %p) |
+| USE_DOUBLE_INTERNALLY                  | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type |
 
-Within CMake, these options lack the `PRINTF_` prefix.
+In the source files themselves, these options become preprocessor definitions with a `PRINTF_` prefix; the boolean ones have value `1` OR `0` for YES or NO respectively; and the aliasing option translates into one of three definitions: `ALIAS_STANDARD_FUNCTION_NAMES_NONE`, `ALIAS_STANDARD_FUNCTION_NAMES_SOFT` or `ALIAS_STANDARD_FUNCTION_NAMES_HARD`.
 
 CMake-only options:
 
 | Option name                            | Default | Description  |
 |----------------------------------------|---------|--------------|
-| PRINTF_BUILD_STATIC_LIBRARY            | NO      |  Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build) |
+| BUILD_STATIC_LIBRARY                   | NO      |  Build a library out of a shared object (dynamically linked at load time) rather than a static one (baked into the executables you build) |
 
 Source-only options:
 
 | Option name                            | Default | Description  |
 |----------------------------------------|---------|--------------|
-| PRINTF_INCLUDE_CONFIG_H                | NO      |  Triggers inclusing by `printf.c` of a "printf_config.h" file, which in turn contains the values of all of the CMake-and-preprocessor options above. A CMake build of the library uses this mechanism to apply the user's choice of options, so it can't have the mechanism itself as an option. |
-
-Note: The preprocessor definitions are taken into account mostly when compiling `printf.c`.
+| PRINTF_INCLUDE_CONFIG_H                | 0       |  Triggers inclusing by `printf.c` of a "printf_config.h" file, which in turn contains the values of all of the CMake-and-preprocessor options above. A CMake build of the library uses this mechanism to apply the user's choice of options, so it can't have the mechanism itself as an option. |
 
 
 ### Reducing compiled code size
@@ -128,7 +126,6 @@ The library's accompanying `CMakeLists.txt` does not set any special optimizatio
 * Compiling with `-ffunction-sections -fdata-sections` and linking with `-WL,--gc-sections`, so that each function and piece of data gets a distinct sections, and discarded if it isn't used.
 
 You would also be advised to turn off all CMake options for printf functionality you don't actually need (listed in the [previous subsection](#cmake-options-and-preprocessor-definitions) above); and to consider [stripping](https://unix.stackexchange.com/q/2969/34868) the resulting executable.
-
 
 
 ## Library API
@@ -246,7 +243,7 @@ The length sub-specifier modifies the length of the data type.
 | `hh`     | `signed char`               | `unsigned char`          |                                       |
 | `h`      | `short int`                 | `unsigned short int`     |                                       |
 | `l`      | `long int`                  | `unsigned long int`      |                                       |
-| `ll`     | `long long int`             | `unsigned long long int` | PRINTF_SUPPORT_LONG_LONG              |
+| `ll`     | `long long int`             | `unsigned long long int` | SUPPORT_LONG_LONG                     |
 | `j`      | `intmax_t`                  | `uintmax_t`              |                                       |
 | `z`      | signed version of `size_t`  | `size_t`                 |                                       |
 | `t`      | `ptrdiff_t`                 | `ptrdiff_t`              |                                       |
