@@ -67,14 +67,6 @@ ATTR_PRINTF((one_based_format_index), 0)
 # define ATTR_VPRINTF(one_based_format_index)
 #endif
 
-#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT 0
-#endif
-
-#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD 0
-#endif
-
 #if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 # define printf_    printf
 # define sprintf_   sprintf
