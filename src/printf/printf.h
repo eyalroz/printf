@@ -39,7 +39,7 @@
 #ifndef PRINTF_H_
 #define PRINTF_H_
 
-#if PRINTF_INCLUDE_CONFIG_H
+#if defined(PRINTF_INCLUDE_CONFIG_H) && PRINTF_INCLUDE_CONFIG_H
 #include "printf_config.h"
 #endif
 
