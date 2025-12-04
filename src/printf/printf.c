@@ -189,7 +189,11 @@
 
 #if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
 
+#if   (CHAR_MAX   == 127)
 #define FLAGS_INT8 FLAGS_CHAR
+#else
+#define PRINTF_NO_8_BIT_TYPE
+#endif
 
 #if   (SHRT_MAX   == 32767LL)
 #define FLAGS_INT16       FLAGS_SHORT
@@ -200,7 +204,7 @@
 #elif (LLONG_MAX  == 32767LL)
 #define FLAGS_INT16       FLAGS_LONG_LONG
 #else
-#error "No basic integer type has a size of 16 bits exactly"
+#define PRINTF_NO_16_BIT_TYPE
 #endif
 
 #if   (SHRT_MAX   == 2147483647LL)
@@ -212,7 +216,7 @@
 #elif (LLONG_MAX  == 2147483647LL)
 #define FLAGS_INT32       FLAGS_LONG_LONG
 #else
-#error "No basic integer type has a size of 32 bits exactly"
+#define PRINTF_NO_32_BIT_TYPE
 #endif
 
 #if   (SHRT_MAX   == 9223372036854775807LL)
@@ -224,7 +228,7 @@
 #elif (LLONG_MAX  == 9223372036854775807LL)
 #define FLAGS_INT64       FLAGS_LONG_LONG
 #else
-#error "No basic integer type has a size of 64 bits exactly"
+#define PRINTF_NO_64_BIT_TYPE
 #endif
 
 #endif /* PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS */
@@ -1296,26 +1300,34 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
         ADVANCE_IN_FORMAT_STRING(format);
         /* Greedily parse for size in bits: 8, 16, 32 or 64 */
         switch(*format) {
+#ifndef PRINTF_NO_8_BIT_TYPE
           case '8':               flags |= FLAGS_INT8;
             ADVANCE_IN_FORMAT_STRING(format);
             break;
+#endif
+#ifndef PRINTF_NO_16_BIT_TYPE
           case '1':
             ADVANCE_IN_FORMAT_STRING(format);
           if (*format == '6') { format++; flags |= FLAGS_INT16; }
             break;
+#endif
+#ifndef PRINTF_NO_32_BIT_TYPE
           case '3':
             ADVANCE_IN_FORMAT_STRING(format);
             if (*format == '2') { ADVANCE_IN_FORMAT_STRING(format); flags |= FLAGS_INT32; }
             break;
+#endif
+#ifndef PRINTF_NO_64_BIT_TYPE
           case '6':
             ADVANCE_IN_FORMAT_STRING(format);
             if (*format == '4') { ADVANCE_IN_FORMAT_STRING(format); flags |= FLAGS_INT64; }
             break;
+#endif
           default: break;
         }
         break;
       }
-#endif
+#endif /* PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS */
       case 'l' :
         flags |= FLAGS_LONG;
         ADVANCE_IN_FORMAT_STRING(format);
