@@ -1094,7 +1094,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
     /* Redo some work :-) */
     floored_exp10 = original_floored_exp10;
     decimal_part_components = get_components(SIGN(negative, abs_number), precision);
-    if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == powers_of_10[floored_exp10 + 1]) {
+    if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == (int_fast64_t) powers_of_10[floored_exp10 + 1]) {
       floored_exp10++; /* Not strictly necessary, since floored_exp10 is no longer really used */
       if (precision > 0U) { precision--; }
       /* ... and it should already be the case that decimal_part_components.fractional == 0 */
