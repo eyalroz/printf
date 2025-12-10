@@ -415,7 +415,7 @@ static inline void putchar_via_gadget(output_gadget_t* gadget, char c)
 }
 
 /* Possibly-write the string-terminating '\0' character */
-static inline void append_termination_with_gadget(output_gadget_t* gadget)
+static inline void append_termination_via_gadget(output_gadget_t* gadget)
 {
   printf_size_t null_char_pos;
   if (gadget->function != NULL || gadget->max_chars == 0) {
@@ -1584,7 +1584,7 @@ static int vsnprintf_impl(output_gadget_t* output, const char* format, va_list a
   format_string_loop(output, format, args);
 
   /* termination */
-  append_termination_with_gadget(output);
+  append_termination_via_gadget(output);
 
   /* return written chars without terminating \0 */
   return (int)output->pos;
