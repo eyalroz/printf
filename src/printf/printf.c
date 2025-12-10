@@ -334,9 +334,9 @@ typedef union {
  */
 static inline floating_point_with_bit_access get_bit_access(floating_point_t x)
 {
-  floating_point_with_bit_access dwba;
-  dwba.F = x;
-  return dwba;
+  floating_point_with_bit_access fpwba;
+  fpwba.F = x;
+  return fpwba;
 }
 
 static inline int get_sign_bit(floating_point_t x)
@@ -946,14 +946,14 @@ static floating_point_t log10_of_positive(floating_point_t positive_number)
    * take the mid-point, 1.5, as the point of expansion.
    */
 
-  floating_point_with_bit_access dwba = get_bit_access(positive_number);
+  floating_point_with_bit_access fpwba = get_bit_access(positive_number);
   /* based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c) */
-  int exp2 = get_exp2(dwba);
+  int exp2 = get_exp2(fpwba);
   floating_point_t z;
-  /* drop the exponent, so dwba.F comes into the range [1,2) */
-  dwba.U = (dwba.U & (((printf_fp_uint_t) (1) << FP_TYPE_STORED_MANTISSA_BITS) - 1U)) |
+  /* drop the exponent, so fpwba.F comes into the range [1,2) */
+  fpwba.U = (fpwba.U & (((printf_fp_uint_t) (1) << FP_TYPE_STORED_MANTISSA_BITS) - 1U)) |
            ((printf_fp_uint_t) FP_TYPE_BASE_EXPONENT << FP_TYPE_STORED_MANTISSA_BITS);
-  z = (dwba.F - (floating_point_t) 1.5);
+  z = (fpwba.F - (floating_point_t) 1.5);
   return (
     /* Taylor expansion around 1.5: */
               (floating_point_t) 0.1760912590556812420 /* Expansion term 0: ln(1.5)            / ln(10) */
@@ -972,7 +972,7 @@ static floating_point_t log10_of_positive(floating_point_t positive_number)
 
 static floating_point_t pow10_of_int(int floored_exp10)
 {
-  floating_point_with_bit_access dwba;
+  floating_point_with_bit_access fpwba;
   int exp2;
   floating_point_t z;
   floating_point_t z2;
@@ -985,13 +985,13 @@ static floating_point_t pow10_of_int(int floored_exp10)
   exp2 = bastardized_floor(floored_exp10 * (floating_point_t) 3.321928094887362 + (floating_point_t) 0.5);
   z  = floored_exp10 * (floating_point_t) 2.302585092994046 - exp2 * (floating_point_t) 0.6931471805599453;
   z2 = z * z;
-  dwba.U = ((printf_fp_uint_t)(exp2) + FP_TYPE_BASE_EXPONENT) << FP_TYPE_STORED_MANTISSA_BITS;
+  fpwba.U = ((printf_fp_uint_t)(exp2) + FP_TYPE_BASE_EXPONENT) << FP_TYPE_STORED_MANTISSA_BITS;
   /*
    * compute exp(z) using continued fractions,
    * see https://en.wikipedia.org/wiki/Exponential_function#Continued_fractions_for_ex
    */
-  dwba.F *= 1 + 2 * z / (2 - z + (z2 / (6 + (z2 / (10 + z2 / 14)))));
-  return dwba.F;
+  fpwba.F *= 1 + 2 * z / (2 - z + (z2 / (6 + (z2 / (10 + z2 / 14)))));
+  return fpwba.F;
 }
 
 static void print_exponential_number(output_gadget_t* output, floating_point_t number, printf_size_t precision, printf_size_t width, printf_flags_t flags, char* buf, printf_size_t len)
