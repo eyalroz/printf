@@ -12,6 +12,7 @@ project(
 
 option(PRINTF_BUILD_TESTS   "Build test programs for the library" ${PROJECT_IS_TOP_LEVEL})
 option(BUILD_SHARED_LIBS    "Build the library as a shared (dynamically-linked) object rather than a static one " ON)
+option(PRINTF_NO_INSTALL    "Skip the installation-related CMake code - prepare for building only" OFF)
 
 # Boolean options which go into config.h
 
@@ -173,49 +174,54 @@ endif()
 # Installation
 # -------------------------
 
-include(GNUInstallDirs)
+if(PRINTF_NO_INSTALL)
+	return()
+else()
+	include(GNUInstallDirs)
 
-# Note: No need for a config.cmake file for setting dependencies - as there
-# are no dependencies; this library is self-contained
+	# Note: No need for a config.cmake file for setting dependencies - as there
+	# are no dependencies; this library is self-contained
 
-install(
-	TARGETS printf
-	EXPORT printf_export
-	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-	INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
+	install(
+		TARGETS printf
+		EXPORT printf_export
+		RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+		ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+		LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
 
-install(
-	FILES "src/printf/printf.h"
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/printf"
-)
+	install(
+		FILES "src/printf/printf.h"
+		DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/printf"
+	)
 
-install(
-	EXPORT printf_export
-	FILE "printf-targets.cmake"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
-	NAMESPACE "printf::"
-)
+	install(
+		EXPORT printf_export
+		FILE "printf-targets.cmake"
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+		NAMESPACE "printf::"
+	)
 
-include(CMakePackageConfigHelpers)
+	include(CMakePackageConfigHelpers)
 
-configure_package_config_file(
-	"cmake/printf-config.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
-	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
-)
-
-write_basic_package_version_file(
-	"printf-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY SameMinorVersion
-)
-
-install(
-	FILES
-		"${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
+	configure_package_config_file(
+		"cmake/printf-config.cmake.in"
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
-)
+		INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+	)
+
+	write_basic_package_version_file(
+		"printf-config-version.cmake"
+		VERSION ${PROJECT_VERSION}
+		COMPATIBILITY SameMinorVersion
+	)
+
+	install(
+		FILES
+			"${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
+			"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+	)
+endif(PRINTF_NO_INSTALL)
+
