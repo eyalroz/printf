@@ -10,7 +10,7 @@ project(
 	VERSION 6.3.0
 )
 
-option(BUILD_TESTS          "Build test programs for the library" OFF)
+option(PRINTF_BUILD_TESTS   "Build test programs for the library" ${PROJECT_IS_TOP_LEVEL})
 option(BUILD_SHARED_LIBS    "Build the library as a shared (dynamically-linked) object rather than a static one " ON)
 
 # Boolean options which go into config.h
@@ -141,7 +141,7 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
 	endif()
 endif()
 
-if (BUILD_TESTS)
+if (PRINTF_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(test)
 endif()
