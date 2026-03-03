@@ -192,12 +192,6 @@ install(
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/printf"
 )
 
-export(
-	EXPORT printf_export
-	NAMESPACE "printf::"
-	FILE "${PROJECT_BINARY_DIR}/printf-targets.cmake"
-)
-
 install(
 	EXPORT printf_export
 	FILE "printf-targets.cmake"
