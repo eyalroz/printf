@@ -823,6 +823,17 @@ PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 
+#if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
+PRINTF_TEST_CASE(avoiding_undefined_behavior)
+{
+  char buffer[base_buffer_size];
+  (void) buffer;
+
+  // May cause UB in call of pow10_of_int() with a high power of 10; see issue #220
+  PRINTING_CHECK("0.0014664",               ==, sprintf_, buffer, "%g", 0.0014663999499999749);
+}
+#endif
+
 PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
 {
   char buffer[base_buffer_size];
