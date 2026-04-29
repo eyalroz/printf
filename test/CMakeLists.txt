@@ -27,7 +27,7 @@ endforeach()
 
 add_executable(aliasing "aliasing.c")
 set_target_properties(
-	${tgt}
+	aliasing
 	PROPERTIES
 	C_STANDARD 11
 	C_STANDARD_REQUIRED YES
@@ -76,12 +76,11 @@ foreach(tgt ${test_targets})
 		)
 		target_compile_options(${tgt} PRIVATE
 		  "$<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>"
-		)			
+		)
 		if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 			target_compile_options(${tgt} PRIVATE -ffat-lto-objects)
 		endif()
 	endif()
-
 endforeach()
 
 if (TARGET test_suite)
