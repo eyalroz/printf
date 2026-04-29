@@ -25,6 +25,21 @@ foreach(tgt ${test_targets})
 	endif()
 endforeach()
 
+add_executable(avoid_int64_to_float_conversion "avoid_int64_to_float_conversion.cpp")
+set_target_properties(
+	avoid_int64_to_float_conversion
+	PROPERTIES
+	CXX_STANDARD 11
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
+target_include_directories(
+	avoid_int64_to_float_conversion
+	PRIVATE
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../src/>"
+)
+list(APPEND test_targets avoid_int64_to_float_conversion)
+
 add_executable(aliasing "aliasing.c")
 set_target_properties(
 	aliasing
@@ -110,5 +125,9 @@ add_test(
 target_link_libraries(aliasing PRIVATE printf)
 target_include_directories(aliasing PRIVATE "$<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>")
 
-# Not running autotest by default - it's randomized after all.
+add_test(
+	NAME "${PROJECT_NAME}.avoid_int64_to_float_conversion"
+	COMMAND "avoid_int64_to_float_conversion"
+)
 
+# Not running autotest by default - it's randomized after all.
