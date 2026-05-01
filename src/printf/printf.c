@@ -360,11 +360,14 @@ static inline int get_exp2(floating_point_with_bit_access x)
 #endif /* (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS) */
 
 /*
- * Note in particular the behavior here on LONG_MIN or LLONG_MIN; it is valid
- * and well-defined, but if you're not careful you can easily trigger undefined
- * behavior with -LONG_MIN or -LLONG_MIN
+ * The treatment of negative values here may seem a bit peculiar; it is intended to avoid
+ * undefined behavior for the case of the minimum signed value of x's type : if we were to
+ * try and negate it when _signed_, that would not be defined. But negating _unsigned_ values
+ * is well-defined, so we take that route. The semantics are also as we would like. See:
+ * @ref https://stackoverflow.com/a/17313717/1593077 (but TODO: Refer to the C language
+ * standard instead).
  */
-#define ABS_FOR_PRINTING(_x) ((printf_unsigned_value_t) ( (_x) > 0 ? (_x) : -((printf_signed_value_t)_x) ))
+#define ABS_FOR_PRINTING(_x) ( ((_x) >= 0) ? (printf_unsigned_value_t)(_x) : -((printf_unsigned_value_t)(_x)) )
 
 /*
  * wrapper (used as buffer) for output function type
