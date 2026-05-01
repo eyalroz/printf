@@ -288,7 +288,7 @@ typedef float  floating_point_t;
 #define FP_TYPE_MANT_DIG FLT_MANT_DIG
 #endif
 
-#define NUM_DECIMAL_DIGITS_IN_INT64_T 18
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T 18
 
 #if FP_TYPE_MANT_DIG == 24
 
@@ -312,7 +312,7 @@ typedef uint64_t printf_fp_uint_t;
 #define FP_TYPE_MAX_10_EXP     DBL_MAX_10_EXP
 #define FP_TYPE_MAX_SUBNORMAL_EXPONENT_OF_10 -308
 #define FP_TYPE_MAX_SUBNORMAL_POWER_OF_10 1e-308
-#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  NUM_DECIMAL_DIGITS_IN_INT64_T - 1
+#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1
 
 
 #else /* FP_TYPE_MANT_DIG is neither 24 nor 53 */
@@ -645,13 +645,15 @@ static void print_integer(output_gadget_t* output, printf_unsigned_value_t value
 
 #if (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 
+typedef int_fast64_t fp_integral_component_t;
+
 /*
  * Stores a fixed-precision representation of a floating-point number relative
  * to a fixed precision (which cannot be determined by examining this structure)
  */
 struct floating_point_components {
-  int_fast64_t integral;
-  int_fast64_t fractional;
+  fp_integral_component_t integral;
+  fp_integral_component_t fractional;
     /*
      * ... truncation of the actual fractional part of the floating_point_t value, scaled
      * by the precision value
@@ -671,7 +673,7 @@ static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 
  * library will be correct up to this precision; it is just an upper-bound for
  * avoiding buffer overruns and such
  */
-#define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_INT64_T - 1)
+#define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
 
 
 /*
@@ -690,9 +692,9 @@ static struct floating_point_components get_components(floating_point_t number, 
   const floating_point_t one_half = (floating_point_t) 0.5;
   number_.is_negative = get_sign_bit(number);
   abs_number = SIGN(number_.is_negative, number);
-  number_.integral = (int_fast64_t) abs_number;
+  number_.integral = (fp_integral_component_t) abs_number;
   scaled_remainder = (abs_number - (floating_point_t) number_.integral) * powers_of_10[precision];
-  number_.fractional = (int_fast64_t) scaled_remainder; /* for precision == 0U, this will be 0 */
+  number_.fractional = (fp_integral_component_t) scaled_remainder; /* for precision == 0U, this will be 0 */
 
   remainder = scaled_remainder - (floating_point_t) number_.fractional;
 
@@ -794,19 +796,19 @@ static struct floating_point_components get_normalized_components(bool negative,
      */
     return get_components(SIGN(negative, scaled), precision);
   }
-  components.integral = (int_fast64_t) scaled;
+  components.integral = (fp_integral_component_t) scaled;
   remainder = non_normalized - unapply_scaling((floating_point_t) components.integral, normalization);
   prec_power_of_10 = powers_of_10[precision];
   account_for_precision = update_normalization(normalization, prec_power_of_10);
   scaled_remainder = apply_scaling(remainder, account_for_precision);
 
-  components.fractional = (int_fast64_t) scaled_remainder; /* when precision == 0, the assigned value should be 0 */
+  components.fractional = (fp_integral_component_t) scaled_remainder; /* when precision == 0, the assigned value should be 0 */
   scaled_remainder -= (floating_point_t) components.fractional; /* when precision == 0, this will not change scaled_remainder */
 
   components.fractional += (scaled_remainder >= rounding_threshold);
   if (scaled_remainder == rounding_threshold) {
     /* banker's rounding: Round towards the even number (making the mean error 0) */
-    components.fractional &= ~((int_fast64_t) 0x1);
+    components.fractional &= ~((fp_integral_component_t) 0x1);
   }
   /*
    * handle rollover, e.g. the case of 0.99 with precision 1 becoming (0,100),
@@ -835,7 +837,7 @@ static void print_broken_up_decimal(
     /* %g/%G mandates we skip the trailing 0 digits... */
     if ((flags & FLAGS_ADAPT_EXP) && !(flags & FLAGS_HASH) && (number_.fractional > 0)) {
       while(true) {
-        int_fast64_t digit = number_.fractional % 10U;
+        fp_integral_component_t digit = number_.fractional % 10;
         if (digit != 0) {
           break;
         }
@@ -852,7 +854,7 @@ static void print_broken_up_decimal(
     if (number_.fractional > 0 || !(flags & FLAGS_ADAPT_EXP) || (flags & FLAGS_HASH) ) {
       while (len < PRINTF_DECIMAL_BUFFER_SIZE) {
         --count;
-        buf[len++] = (char)('0' + number_.fractional % 10U);
+        buf[len++] = (char)('0' + number_.fractional % 10);
         if (!(number_.fractional /= 10U)) {
           break;
         }
@@ -1093,7 +1095,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
     /* Redo some work :-) */
     floored_exp10 = original_floored_exp10;
     decimal_part_components = get_components(SIGN(negative, abs_number), precision);
-    if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == (int_fast64_t) powers_of_10[floored_exp10 + 1]) {
+    if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == (fp_integral_component_t) powers_of_10[floored_exp10 + 1]) {
       floored_exp10++; /* Not strictly necessary, since floored_exp10 is no longer really used */
       if (precision > 0U) { precision--; }
       /* ... and it should already be the case that decimal_part_components.fractional == 0 */
