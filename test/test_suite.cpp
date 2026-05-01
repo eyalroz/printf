@@ -414,10 +414,11 @@ PRINTF_TEST_CASE(brute_force_float)
     sprintf_(buffer, "%.5f", (double) (i / 10000));
     sstr.str("");
     sstr << std::fixed << i / 10000;
-    if (strcmp(buffer, sstr.str().c_str()) != 0) {
+    auto expected = sstr.str();
+    if (strcmp(buffer, expected.c_str()) != 0) {
       std::cerr
       << ": sprintf_(\"%.5f\", " << std::setw(6) << i << ") = " << std::setw(10) << buffer << " , "
-      << "expected " << std::setw(10) << sstr.str().c_str() << "\n";
+      << "expected " << std::setw(10) << expected.c_str() << "\n";
       any_failed = true;
     }
   }
@@ -439,12 +440,12 @@ PRINTF_TEST_CASE(brute_force_float)
     sprintf_(buffer, "%." EXPAND_AND_STRINGIFY(LOOP_PRECISION) "f", (double) i);
     sstr.str("");
     sstr << std::setprecision(LOOP_PRECISION) << i;
-    auto expected = sstr.str().c_str();
-    if (strcmp(buffer, expected) != 0) {
+    auto expected = sstr.str();
+    if (strcmp(buffer, expected.c_str()) != 0) {
       std::cerr
       << n << ": sprintf_(\"%" EXPAND_AND_STRINGIFY(LOOP_PRECISION) "f\", " << std::setw(18) << std::setprecision(30) << i << ") = " << std::setw(15)
       << buffer << " , "
-      << "expected " << std::setw(12) << sstr.str().c_str() << "\n";
+      << "expected " << std::setw(12) << expected.c_str() << "\n";
       any_failed = true;
     }
   }
