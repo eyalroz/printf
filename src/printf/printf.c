@@ -1457,7 +1457,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
       case 'f' :
       case 'F' : {
-        floating_point_t value = (floating_point_t) (flags & FLAGS_LONG_DOUBLE ? va_arg(args, long double) : va_arg(args, double));
+        floating_point_t value = (flags & FLAGS_LONG_DOUBLE ? (floating_point_t) va_arg(args, long double) : (floating_point_t) va_arg(args, double));
         if (*format == 'F') flags |= FLAGS_UPPERCASE;
         print_floating_point(output, value, precision, width, flags, PRINTF_PREFER_DECIMAL);
         format++;
@@ -1469,7 +1469,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       case 'E':
       case 'g':
       case 'G': {
-        floating_point_t value = (floating_point_t) (flags & FLAGS_LONG_DOUBLE ? va_arg(args, long double) : va_arg(args, double));
+        floating_point_t value = (flags & FLAGS_LONG_DOUBLE ? (floating_point_t) va_arg(args, long double) : (floating_point_t) va_arg(args, double));
         if ((*format == 'g')||(*format == 'G')) flags |= FLAGS_ADAPT_EXP;
         if ((*format == 'E')||(*format == 'G')) flags |= FLAGS_UPPERCASE;
         print_floating_point(output, value, precision, width, flags, PRINTF_PREFER_EXPONENTIAL);
