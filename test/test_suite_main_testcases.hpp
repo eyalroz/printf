@@ -1132,6 +1132,10 @@ PRINTF_TEST_CASE(misc)
   // so we can't complain if we get the banker's rounding for 0.995 to 1.00 as the
   // output
   //PRINTING_CHECK("1.00",                    ==, sprintf_, buffer, "%.2f", 0.995);
+
+  // Two invocations which made clang 21's integer sanitizer suspicious (issue #220)
+  PRINTING_CHECK("{",                         ==, sprintf_, buffer, "%s", "{");
+  PRINTING_CHECK("0.0014664",                 ==, sprintf_, buffer, "%g", 0.0014663999499999749);
 }
 
 

@@ -990,7 +990,7 @@ static floating_point_t pow10_of_int(int floored_exp10)
   exp2 = bastardized_floor(floored_exp10 * (floating_point_t) 3.321928094887362 + (floating_point_t) 0.5);
   z  = floored_exp10 * (floating_point_t) 2.302585092994046 - exp2 * (floating_point_t) 0.6931471805599453;
   z2 = z * z;
-  fpwba.U = ((printf_fp_uint_t)(exp2) + FP_TYPE_BASE_EXPONENT) << FP_TYPE_STORED_MANTISSA_BITS;
+  fpwba.U = ((printf_fp_uint_t)(exp2 + FP_TYPE_BASE_EXPONENT)) << FP_TYPE_STORED_MANTISSA_BITS;
   /*
    * compute exp(z) using continued fractions,
    * see https://en.wikipedia.org/wiki/Exponential_function#Continued_fractions_for_ex
@@ -1519,7 +1519,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
           /* string output */
           while ((*p != 0) && (!(flags & FLAGS_PRECISION) || precision)) {
             putchar_via_gadget(output, *(p++));
-            --precision;
+            --precision; /* Note: If the precision was not set, the ignored `precision` value will underflow; this is defined behavior. */
           }
           /* post padding */
           if (flags & FLAGS_LEFT) {
