@@ -7,7 +7,7 @@ project(
 	LANGUAGES C
 	DESCRIPTION "Self-contained C implementation of printf, vprintf, sprintf and related functions"
 	HOMEPAGE_URL https://github.com/eyalroz/printf
-	VERSION 6.3.0
+	VERSION 6.4.0
 )
 
 option(PRINTF_BUILD_TESTS   "Build test programs for the library" ${PROJECT_IS_TOP_LEVEL})
