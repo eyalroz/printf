@@ -196,10 +196,12 @@ else()
 		DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/printf"
 	)
 
+	set(PRINTF_INSTALL_CONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/printf")
+
 	install(
 		EXPORT printf_export
 		FILE "printf-targets.cmake"
-		DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+		DESTINATION "${PRINTF_INSTALL_CONFIG_DIR}"
 		NAMESPACE "printf::"
 	)
 
@@ -208,7 +210,7 @@ else()
 	configure_package_config_file(
 		"cmake/printf-config.cmake.in"
 		"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
-		INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+		INSTALL_DESTINATION "${PRINTF_INSTALL_CONFIG_DIR}"
 	)
 
 	write_basic_package_version_file(
@@ -221,7 +223,7 @@ else()
 		FILES
 			"${CMAKE_CURRENT_BINARY_DIR}/printf-config-version.cmake"
 			"${CMAKE_CURRENT_BINARY_DIR}/printf-config.cmake"
-		DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/printf"
+		DESTINATION "${PRINTF_INSTALL_CONFIG_DIR}"
 	)
 endif(PRINTF_NO_INSTALL)
 
