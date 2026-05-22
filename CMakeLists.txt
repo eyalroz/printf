@@ -22,6 +22,7 @@ option(SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS  "Support the I + bit size integer 
 option(SUPPORT_WRITEBACK_SPECIFIER            "Support the length write-back specifier (%n)" ON)
 option(SUPPORT_LONG_LONG                      "Support long long integral types (allows for the ll length modifier and affects %p)" ON)
 option(USE_DOUBLE_INTERNALLY                  "Use the C `double` type - typically 64-bit in size - for internal floating-point arithmetic " ON)
+option(AVOID_INT64_TO_FLOAT_CONVERSION        "Avoid int64_t-to-float conversions when using single-precision internal floating-point arithmetic" OFF)
 option(CHECK_FOR_NUL_IN_FORMAT_SPECIFIER      "Be defensive in the undefined-behavior case of a format specifier not ending before the string ends" ON)
 
 set(ALIASING_MODES NONE HARD SOFT)
@@ -41,6 +42,7 @@ foreach(opt
 	SUPPORT_WRITEBACK_SPECIFIER
 	SUPPORT_LONG_LONG
 	USE_DOUBLE_INTERNALLY
+	AVOID_INT64_TO_FLOAT_CONVERSION
 	ALIAS_STANDARD_FUNCTION_NAMES_SOFT
 	ALIAS_STANDARD_FUNCTION_NAMES_HARD
 	CHECK_FOR_NUL_IN_FORMAT_SPECIFIER

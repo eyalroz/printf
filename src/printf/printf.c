@@ -118,6 +118,15 @@
 #endif
 
 /*
+ * Use 32-bit integer chunks for single-precision floating point formatting. This avoids
+ * int64_t-to-float conversions on targets requiring large and slow software float routines, at the
+ * cost of lower maximum precision.
+ */
+#ifndef PRINTF_AVOID_INT64_TO_FLOAT_CONVERSION
+#define PRINTF_AVOID_INT64_TO_FLOAT_CONVERSION 0
+#endif
+
+/*
  * According to the C languages standard, printf() and related functions must be able to print any
  * integral number in floating-point notation, regardless of length, when using the %f specifier -
  * possibly hundreds of characters, potentially overflowing your buffers. In this implementation,
@@ -280,15 +289,37 @@ typedef unsigned int printf_size_t;
  * representation and manipulation of values as long doubles; the options
  * are either single-precision `float` or double-precision `double`.
  */
+#define NUM_DECIMAL_DIGITS_IN_INT64_T 18
+#define NUM_DECIMAL_DIGITS_IN_INT32_T 10
+
+/*
+ * Keep the fixed-point decimal chunks within the integer type used to hold
+ * them. The value is a precision, so it is one less than the number of base-10
+ * digits the type can safely hold for values in [0, 10^precision).
+ */
 #if PRINTF_USE_DOUBLE_INTERNALLY
 typedef double floating_point_t;
+typedef int_fast64_t fp_integral_component_t;
 #define FP_TYPE_MANT_DIG DBL_MANT_DIG
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T NUM_DECIMAL_DIGITS_IN_INT64_T
 #else
 typedef float  floating_point_t;
+#if PRINTF_AVOID_INT64_TO_FLOAT_CONVERSION
+typedef int32_t fp_integral_component_t;
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T NUM_DECIMAL_DIGITS_IN_INT32_T
+#else
+typedef int_fast64_t fp_integral_component_t;
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T NUM_DECIMAL_DIGITS_IN_INT64_T
+#endif
 #define FP_TYPE_MANT_DIG FLT_MANT_DIG
 #endif
 
-#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T 18
+/*
+ * Note: This value does not mean that all floating-point values printed with the
+ * library will be correct up to this precision; it is just an upper-bound for
+ * avoiding buffer overruns and such.
+ */
+#define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
 
 #if FP_TYPE_MANT_DIG == 24
 
@@ -648,8 +679,6 @@ static void print_integer(output_gadget_t* output, printf_unsigned_value_t value
 
 #if (PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS)
 
-typedef int_fast64_t fp_integral_component_t;
-
 /*
  * Stores a fixed-precision representation of a floating-point number relative
  * to a fixed precision (which cannot be determined by examining this structure)
@@ -670,14 +699,6 @@ static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 
   , 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
 #endif
 };
-
-/*
- * Note: This value does not mean that all floating-point values printed with the
- * library will be correct up to this precision; it is just an upper-bound for
- * avoiding buffer overruns and such
- */
-#define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
-
 
 /*
  * Break up a non-negative, finite, floating-point number into two integral
@@ -1173,6 +1194,17 @@ static void print_floating_point(output_gadget_t* output, floating_point_t value
     return;
   }
 
+#if (!PRINTF_USE_DOUBLE_INTERNALLY && PRINTF_AVOID_INT64_TO_FLOAT_CONVERSION)
+  /*
+   * The decimal-to-exponential fallback below happens before the common precision-limiting block.
+   * Keep the requested precision within the 32-bit fractional chunk too.
+   */
+  while ((len < PRINTF_DECIMAL_BUFFER_SIZE) && (precision > PRINTF_MAX_SUPPORTED_PRECISION)) {
+    buf[len++] = '0'; /* This respects the precision in terms of result length only */
+    precision--;
+  }
+#endif
+
   if (!prefer_exponential &&
       ((value > PRINTF_FLOAT_NOTATION_THRESHOLD) || (value < -PRINTF_FLOAT_NOTATION_THRESHOLD))) {
     /*
@@ -1660,4 +1692,3 @@ int fctprintf(void (*out)(char c, void* extra_arg), void* extra_arg, const char*
   va_end(args);
   return ret;
 }
-
