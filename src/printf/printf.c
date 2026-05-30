@@ -614,7 +614,11 @@ static void print_integer_finalization(output_gadget_t* output, char* buf, print
 /* An internal itoa-like function */
 static void print_integer(output_gadget_t* output, printf_unsigned_value_t value, bool negative, numeric_base_t base, printf_size_t precision, printf_size_t width, printf_flags_t flags)
 {
+  #ifdef PRINTF_NO_STACK_BUFFER
+  static char buf[PRINTF_INTEGER_BUFFER_SIZE] = { 0 };
+  #else
   char buf[PRINTF_INTEGER_BUFFER_SIZE];
+  #endif // PRINTF_NO_STACK_BUFFER
   printf_size_t len = 0U;
 
   if (!value) {
@@ -1156,7 +1160,11 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 
 static void print_floating_point(output_gadget_t* output, floating_point_t value, printf_size_t precision, printf_size_t width, printf_flags_t flags, bool prefer_exponential)
 {
+  #ifdef PRINTF_NO_STACK_BUFFER
+  static char buf[PRINTF_DECIMAL_BUFFER_SIZE] = { 0 };
+  #else
   char buf[PRINTF_DECIMAL_BUFFER_SIZE];
+  #endif // PRINTF_NO_STACK_BUFFER
   printf_size_t len = 0U;
 
   /* test for special values */
