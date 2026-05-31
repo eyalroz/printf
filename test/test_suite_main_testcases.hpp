@@ -735,7 +735,7 @@ PRINTF_TEST_CASE(tiny_floating_point_values)
   char buffer[base_buffer_size];
   (void) buffer;
 
-//  boltzman_s_constant = 1.380651569e-23;
+  // These examples use Boltzman's constant: 1.380651569e-23
 
   PRINTING_CHECK("1e-23",                   ==, sprintf_, buffer, "%.0e",  1.380651569e-23);
   PRINTING_CHECK("1.4e-23",                 ==, sprintf_, buffer, "%.1e",  1.380651569e-23);
@@ -749,12 +749,12 @@ PRINTF_TEST_CASE(tiny_floating_point_values)
   PRINTING_CHECK("1.380651569e-23",         ==, sprintf_, buffer, "%.9e",  1.380651569e-23);
   PRINTING_CHECK("1.3806515690e-23",        ==, sprintf_, buffer, "%.10e", 1.380651569e-23);
   PRINTING_CHECK("1.38065156900e-23",       ==, sprintf_, buffer, "%.11e", 1.380651569e-23);
-// These go beyond our precision abilities; enable them, and they will likely fail.
-//  PRINTING_CHECK("1.380651569000e-23",    ==, sprintf_, buffer, "%.12e", 1.380651569e-23);
-//  PRINTING_CHECK("1.3806515690000e-23",   ==, sprintf_, buffer, "%.13e", 1.380651569e-23);
-//  PRINTING_CHECK("1.38065156900000e-23",  ==, sprintf_, buffer, "%.14e", 1.380651569e-23);
-//  PRINTING_CHECK("1.380651569000000e-23", ==, sprintf_, buffer, "%.15e", 1.380651569e-23);
-//  PRINTING_CHECK("1.3806515690000000e-23", ==, sprintf_, buffer, "%.16e", 1.380651569e-23);
+  // These go beyond our precision abilities; enable them, and they will likely fail.
+  //  PRINTING_CHECK("1.380651569000e-23",    ==, sprintf_, buffer, "%.12e", 1.380651569e-23);
+  //  PRINTING_CHECK("1.3806515690000e-23",   ==, sprintf_, buffer, "%.13e", 1.380651569e-23);
+  //  PRINTING_CHECK("1.38065156900000e-23",  ==, sprintf_, buffer, "%.14e", 1.380651569e-23);
+  //  PRINTING_CHECK("1.380651569000000e-23", ==, sprintf_, buffer, "%.15e", 1.380651569e-23);
+  //  PRINTING_CHECK("1.3806515690000000e-23", ==, sprintf_, buffer, "%.16e", 1.380651569e-23);
 }
 
 #endif
