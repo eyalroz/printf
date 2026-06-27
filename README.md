@@ -102,6 +102,7 @@ Options used both in CMake and in the library source code via a preprocessor def
 | SUPPORT_WRITEBACK_SPECIFIER            | YES     |  Support the length write-back specifier (%n) |
 | SUPPORT_LONG_LONG                      | YES     |  Support long long integral types (allows for the ll length modifier and affects %p) |
 | USE_DOUBLE_INTERNALLY                  | YES     |  Use the `double` for internal floating-point calculations (rather than using the single-precision `float` type |
+| NO_STACK_BUFFER						 | NO	   |  Define buffers as static |
 
 In the source files themselves, these options become preprocessor definitions with a `PRINTF_` prefix; the boolean ones have value `1` OR `0` for YES or NO respectively; and the aliasing option translates into one of three definitions: `ALIAS_STANDARD_FUNCTION_NAMES_NONE`, `ALIAS_STANDARD_FUNCTION_NAMES_SOFT` or `ALIAS_STANDARD_FUNCTION_NAMES_HARD`.
 
