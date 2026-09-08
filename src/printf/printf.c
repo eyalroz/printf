@@ -312,7 +312,7 @@ typedef uint64_t printf_fp_uint_t;
 #define FP_TYPE_MAX_10_EXP     DBL_MAX_10_EXP
 #define FP_TYPE_MAX_SUBNORMAL_EXPONENT_OF_10 -308
 #define FP_TYPE_MAX_SUBNORMAL_POWER_OF_10 1e-308
-#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1
+#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
 
 
 #else /* FP_TYPE_MANT_DIG is neither 24 nor 53 */
@@ -674,9 +674,14 @@ static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 
 /*
  * Note: This value does not mean that all floating-point values printed with the
  * library will be correct up to this precision; it is just an upper-bound for
- * avoiding buffer overruns and such
+ * avoiding buffer overruns and such: The fractional component must fit in an
+ * fp_integral_component_t, and the precision is also used as an index into powers_of_10.
  */
+#if PRINTF_MAX_PRECOMPUTED_POWER_OF_10 < NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1
+#define PRINTF_MAX_SUPPORTED_PRECISION PRINTF_MAX_PRECOMPUTED_POWER_OF_10
+#else
 #define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
+#endif
 
 
 /*
