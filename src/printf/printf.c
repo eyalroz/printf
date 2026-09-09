@@ -288,8 +288,6 @@ typedef float  floating_point_t;
 #define FP_TYPE_MANT_DIG FLT_MANT_DIG
 #endif
 
-#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T 18
-
 #if FP_TYPE_MANT_DIG == 24
 
 typedef uint32_t printf_fp_uint_t;
@@ -298,9 +296,9 @@ typedef uint32_t printf_fp_uint_t;
 #define FP_TYPE_BASE_EXPONENT  127
 #define FP_TYPE_MAX            FLT_MAX
 #define FP_TYPE_MAX_10_EXP     FLT_MAX_10_EXP
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T 11
 #define FP_TYPE_MAX_SUBNORMAL_EXPONENT_OF_10 -38
 #define FP_TYPE_MAX_SUBNORMAL_POWER_OF_10 1e-38f
-#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  10
 
 #elif FP_TYPE_MANT_DIG == 53
 
@@ -310,15 +308,32 @@ typedef uint64_t printf_fp_uint_t;
 #define FP_TYPE_BASE_EXPONENT  1023
 #define FP_TYPE_MAX            DBL_MAX
 #define FP_TYPE_MAX_10_EXP     DBL_MAX_10_EXP
+#define NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T 18
 #define FP_TYPE_MAX_SUBNORMAL_EXPONENT_OF_10 -308
 #define FP_TYPE_MAX_SUBNORMAL_POWER_OF_10 1e-308
-#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
 
 
 #else /* FP_TYPE_MANT_DIG is neither 24 nor 53 */
 #error "Unsupported floating point type configuration"
 #endif /* FP_TYPE_MANT_DIG */
 #define FP_TYPE_STORED_MANTISSA_BITS (FP_TYPE_MANT_DIG - 1)
+
+/*
+ * Note: This value does not mean that all floating-point values printed with the
+ * library will be correct up to this precision; it is just an upper-bound for
+ * avoiding buffer overruns and such.
+ */
+#define PRINTF_MAX_SUPPORTED_PRECISION      (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
+/* The precision is used as an index into the precomputed powers_of_10 array, and thus, */
+#define PRINTF_MAX_PRECOMPUTED_POWER_OF_10  PRINTF_MAX_SUPPORTED_PRECISION
+
+static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 1] = {
+  1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09, 1e10
+#if PRINTF_MAX_PRECOMPUTED_POWER_OF_10 > 10
+  , 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
+#endif
+};
+
 
 typedef union {
   printf_fp_uint_t  U;
@@ -663,21 +678,6 @@ struct floating_point_components {
      */
   bool is_negative;
 };
-
-static const floating_point_t powers_of_10[PRINTF_MAX_PRECOMPUTED_POWER_OF_10 + 1] = {
-  1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09, 1e10
-#if PRINTF_MAX_PRECOMPUTED_POWER_OF_10 > 10
-  , 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
-#endif
-};
-
-/*
- * Note: This value does not mean that all floating-point values printed with the
- * library will be correct up to this precision; it is just an upper-bound for
- * avoiding buffer overruns and such
- */
-#define PRINTF_MAX_SUPPORTED_PRECISION (NUM_DECIMAL_DIGITS_IN_FP_INTEGRAL_COMPONENT_T - 1)
-
 
 /*
  * Break up a non-negative, finite, floating-point number into two integral
