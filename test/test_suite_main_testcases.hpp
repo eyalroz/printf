@@ -399,6 +399,20 @@ PRINTF_TEST_CASE(width_asterisk_20)
 }
 
 
+// A width given via '*' is negated when negative, so that it can be treated
+// as a positive width plus the left-justify flag. Negating INT_MIN this way
+// is undefined behavior, since its magnitude does not fit back into an int;
+// under a UBSan build configured to trap on undefined behavior (a realistic
+// hardening setup) this call used to abort the program outright.
+PRINTF_TEST_CASE(width_asterisk_int_min)
+{
+  char buffer[base_buffer_size];
+  (void) buffer;
+
+  PRINTING_CHECK_WITH_BUF_SIZE("5      ", ==, snprintf_, buffer, 8U, "%*d", std::numeric_limits<int>::min(), 5);
+}
+
+
 PRINTF_TEST_CASE(width_minus_20)
 {
   char buffer[base_buffer_size];

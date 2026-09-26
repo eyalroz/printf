@@ -1263,7 +1263,13 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       const int w = va_arg(args, int);
       if (w < 0) {
         flags |= FLAGS_LEFT;    /* reverse padding */
-        width = (printf_size_t)-w;
+        /*
+         * Negating INT_MIN directly is undefined behavior (its magnitude
+         * doesn't fit in an int); convert to the unsigned width type first,
+         * then negate, which is well-defined modular arithmetic and yields
+         * the same result on two's complement platforms.
+         */
+        width = -(printf_size_t)w;
       }
       else {
         width = (printf_size_t)w;
