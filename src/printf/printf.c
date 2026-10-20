@@ -493,18 +493,20 @@ static inline output_gadget_t extern_putchar_gadget(void)
 }
 
 /*
- * internal secure strlen
- * @return The length of the string (excluding the terminating 0) limited by 'maxsize'
- * @note strlen uses size_t, but wes only use this function with printf_size_t
- * variables - hence the signature.
+ * A variant of C11's `strnlen_s` (i.e. POSIX's `strnlen`), for internal use,
+ * on non-null pointers.
+ *
+ * @return The length of the string {@param str}, excluding the terminating
+ *     '\0' character, but never more than {@param maxsize}.
+ * @note the standard library strlen uses `size_t`, but we only use this
+ * function with `printf_size_t` variables - hence the signature.
  */
 static inline printf_size_t strnlen_s_(const char* str, printf_size_t maxsize)
 {
   const char* s;
-  for (s = str; *s && maxsize--; ++s);
+  for (s = str; maxsize && *s; ++s, --maxsize);
   return (printf_size_t)(s - str);
 }
-
 
 /*
  * internal test if char is a digit (0-9)
@@ -1517,7 +1519,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
             }
           }
           /* string output */
-          while ((*p != 0) && (!(flags & FLAGS_PRECISION) || precision)) {
+          while ((!(flags & FLAGS_PRECISION) || precision) && (*p != 0)) {
             putchar_via_gadget(output, *(p++));
             --precision; /* Note: If the precision was not set, the ignored `precision` value will underflow; this is defined behavior. */
           }
