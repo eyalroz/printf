@@ -486,7 +486,7 @@ static inline output_gadget_t extern_putchar_gadget(void)
 static inline printf_size_t strnlen_s_(const char* str, printf_size_t maxsize)
 {
   const char* s;
-  for (s = str; *s && maxsize--; ++s);
+  for (s = str; maxsize-- && *s; ++s);
   return (printf_size_t)(s - str);
 }
 
@@ -1517,7 +1517,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
             }
           }
           /* string output */
-          while ((*p != 0) && (!(flags & FLAGS_PRECISION) || precision)) {
+          while ((!(flags & FLAGS_PRECISION) || precision) && (*p != 0)) {
             putchar_via_gadget(output, *(p++));
             --precision; /* Note: If the precision was not set, the ignored `precision` value will underflow; this is defined behavior. */
           }
