@@ -1265,7 +1265,8 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       const int w = va_arg(args, int);
       if (w < 0) {
         flags |= FLAGS_LEFT;    /* reverse padding */
-        width = (printf_size_t)-w;
+        /* the cast precedes the negation to avoid undefined behavior for INT_MIN */
+        width = -(printf_size_t)w;
       }
       else {
         width = (printf_size_t)w;

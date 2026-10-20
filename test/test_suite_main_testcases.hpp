@@ -399,6 +399,26 @@ PRINTF_TEST_CASE(width_asterisk_20)
 }
 
 
+// A negative '*' width means "left-justify with the absolute width". INT_MIN has
+// no positive `int` representation, so negating it directly would be undefined
+// behavior; the library must negate only after converting to the unsigned width
+// type. Use snprintf_ with a tiny buffer so the astronomically large width is
+// truncated instead of being written out in full.
+PRINTF_TEST_CASE(width_asterisk_int_min)
+{
+  char buffer[base_buffer_size];
+  int ret = snprintf_(buffer, 8U, "%*d", INT_MIN, 5);
+  // The value is left-justified ("5" first), then padded with spaces up to the
+  // (truncated) width; buffer[7] is the NUL terminator.
+  CHECK(buffer[0] == '5');
+  for (size_t i = 1; i < 7; i++) {
+    CHECK(buffer[i] == ' ');
+  }
+  CHECK(buffer[7] == '\0');
+  (void) ret;
+}
+
+
 PRINTF_TEST_CASE(width_minus_20)
 {
   char buffer[base_buffer_size];
