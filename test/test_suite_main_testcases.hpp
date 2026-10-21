@@ -841,10 +841,38 @@ PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 
 #endif // PRINTF_SUPPORT_DECIMAL_SPECIFIERS
 
+PRINTF_TEST_CASE(non_null_terminated_strings)
+{
+  char buffer[base_buffer_size];
+  (void) buffer;
+  char not_null_terminated[16];
+  memset(not_null_terminated, 0xDE, 16);
+
+  not_null_terminated[4] = 'a';
+  not_null_terminated[5] = 'b';
+
+  std::memset(buffer, 0xCC, base_buffer_size);
+  sprintf_(buffer, "%.2s", not_null_terminated + 4);
+  buffer[base_buffer_size - 1] = '\0';
+  INFO("sprintf_(buffer, \"%.2s\", /* a non-null-terminated buffer starting with 'a' then 'b'])");
+  INFO("----");
+  INFO("Resulting buffer contents: " << '"' << buffer << '"');
+  CHECK(!strcmp(buffer, "ab"));
+  // Will we search the not-null-terminated buffer for a nul terminator? Will we copy
+  // anything to the result buffer? See issue #234
+
+  std::memset(buffer, 0xCC, base_buffer_size);
+  sprintf_(buffer, "%.*s", 0, not_null_terminated + 4);
+  buffer[base_buffer_size - 1] = '\0';
+  INFO("----");
+  INFO("Resulting buffer contents: " << '"' << buffer << '"');
+  CHECK(!strcmp(buffer, ""));
+}
+
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
 
 #if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
-PRINTF_TEST_CASE(avoiding_undefined_behavior)
+PRINTF_TEST_CASE(avoiding_undefined_behavior_with_expontential)
 {
   char buffer[base_buffer_size];
   (void) buffer;

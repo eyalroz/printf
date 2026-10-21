@@ -1503,7 +1503,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
           out_rev_(output, ")llun(", 6, width, flags);
         }
         else {
-          printf_size_t l = strnlen_s_(p, precision ? precision : PRINTF_MAX_POSSIBLE_BUFFER_SIZE);
+          printf_size_t l = strnlen_s_(p, (flags & FLAGS_PRECISION) ? precision : PRINTF_MAX_POSSIBLE_BUFFER_SIZE);
           /* pre padding */
           if (flags & FLAGS_PRECISION) {
             l = (l < precision ? l : precision);
