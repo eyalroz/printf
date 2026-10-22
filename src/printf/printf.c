@@ -1230,12 +1230,6 @@ static printf_flags_t parse_flags(const char** format)
 
 static inline void format_string_loop(output_gadget_t* output, const char* format, va_list args)
 {
-#if PRINTF_CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
-#define ADVANCE_IN_FORMAT_STRING(cptr_) do { (cptr_)++; if (!*(cptr_)) return; } while(0)
-#else
-#define ADVANCE_IN_FORMAT_STRING(cptr_) (cptr_)++
-#endif
-
   while (*format)
   {
     printf_flags_t flags;
@@ -1248,7 +1242,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       continue;
     }
     /* We're parsing a format specifier: %[flags][width][.precision][length] */
-    ADVANCE_IN_FORMAT_STRING(format);
+    format++;
 
     flags = parse_flags(&format);
 
@@ -1271,17 +1265,17 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
       else {
         width = (printf_size_t)w;
       }
-      ADVANCE_IN_FORMAT_STRING(format);
+      format++;
     }
 
     /* evaluate precision field */
     precision = 0U;
     if (*format == '.') {
       flags |= FLAGS_PRECISION;
-      ADVANCE_IN_FORMAT_STRING(format);
+      format++;
       if (*format == '-') {
         do {
-          ADVANCE_IN_FORMAT_STRING(format);
+          format++;
         } while (is_digit_(*format));
         flags &= ~FLAGS_PRECISION;
       }
@@ -1296,7 +1290,7 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
         else {
           precision = precision_ > 0 ? (printf_size_t) precision_ : 0U;
         }
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
       }
     }
 
@@ -1304,30 +1298,30 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
     switch (*format) {
 #if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
       case 'I' : {
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         /* Greedily parse for size in bits: 8, 16, 32 or 64 */
         switch(*format) {
 #ifndef PRINTF_NO_8_BIT_TYPE
           case '8':               flags |= FLAGS_INT8;
-            ADVANCE_IN_FORMAT_STRING(format);
+            format++;
             break;
 #endif
 #ifndef PRINTF_NO_16_BIT_TYPE
           case '1':
-            ADVANCE_IN_FORMAT_STRING(format);
-          if (*format == '6') { format++; flags |= FLAGS_INT16; }
+            format++;
+            if (*format == '6') { format++; flags |= FLAGS_INT16; }
             break;
 #endif
 #ifndef PRINTF_NO_32_BIT_TYPE
           case '3':
-            ADVANCE_IN_FORMAT_STRING(format);
-            if (*format == '2') { ADVANCE_IN_FORMAT_STRING(format); flags |= FLAGS_INT32; }
+            format++;
+            if (*format == '2') { format++; flags |= FLAGS_INT32; }
             break;
 #endif
 #ifndef PRINTF_NO_64_BIT_TYPE
           case '6':
-            ADVANCE_IN_FORMAT_STRING(format);
-            if (*format == '4') { ADVANCE_IN_FORMAT_STRING(format); flags |= FLAGS_INT64; }
+            format++;
+            if (*format == '4') { format++; flags |= FLAGS_INT64; }
             break;
 #endif
           default: break;
@@ -1337,35 +1331,35 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
 #endif /* PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS */
       case 'l' :
         flags |= FLAGS_LONG;
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         if (*format == 'l') {
           flags |= FLAGS_LONG_LONG;
-          ADVANCE_IN_FORMAT_STRING(format);
+          format++;
         }
         break;
       case 'L' :
         flags |= FLAGS_LONG_DOUBLE;
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         break;
       case 'h' :
         flags |= FLAGS_SHORT;
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         if (*format == 'h') {
           flags |= FLAGS_CHAR;
-          ADVANCE_IN_FORMAT_STRING(format);
+          format++;
         }
         break;
       case 't' :
         flags |= (sizeof(ptrdiff_t) <= sizeof(int) ) ? FLAGS_INT : (sizeof(ptrdiff_t) == sizeof(long)) ? FLAGS_LONG : FLAGS_LONG_LONG;
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         break;
       case 'j' :
         flags |= (sizeof(intmax_t) == sizeof(long) ? FLAGS_LONG : FLAGS_LONG_LONG);
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         break;
       case 'z' :
         flags |= (sizeof(size_t) <= sizeof(int) ) ? FLAGS_INT : (sizeof(size_t) == sizeof(long)) ? FLAGS_LONG : FLAGS_LONG_LONG;
-        ADVANCE_IN_FORMAT_STRING(format);
+        format++;
         break;
       default:
         break;
@@ -1572,6 +1566,11 @@ static inline void format_string_loop(output_gadget_t* output, const char* forma
         break;
       }
 #endif /* PRINTF_SUPPORT_WRITEBACK_SPECIFIER */
+
+#if PRINTF_CHECK_FOR_NUL_IN_FORMAT_SPECIFIER
+      case '\0' :
+        break;
+#endif
 
       default :
         putchar_via_gadget(output, *format);
