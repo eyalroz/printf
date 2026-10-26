@@ -1097,6 +1097,13 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 
   if (fall_back_to_decimal_only_mode) {
     precision = ((int) precision > floored_exp10) ? (unsigned) ((int) precision - floored_exp10) : 0U;
+    /* We must re-enforce our supported maximum precision to avoid undefined behavior later on. */
+    while (precision > PRINTF_MAX_SUPPORTED_PRECISION) {
+      if ((flags & FLAGS_HASH) && (len < PRINTF_DECIMAL_BUFFER_SIZE)) {
+        buf[len++] = '0';
+      }
+      precision--;
+    }
     /* Redo some work :-) */
     floored_exp10 = original_floored_exp10;
     decimal_part_components = get_components(SIGN(negative, abs_number), precision);
