@@ -9,6 +9,7 @@ endif()
 
 option(TEST_WITH_NON_STANDARD_FORMAT_STRINGS "Include tests using non-standard-compliant format strings?" ON)
 # ... don't worry, we'll suppress the compiler warnings for those.
+option(TEST_WITH_ADDRESS_SANITIZER "Use the compiler's address sanitizer on the test executables" OFF)
 
 foreach(tgt ${test_targets})
 	add_executable(${tgt} "${tgt}.cpp")
@@ -22,6 +23,12 @@ foreach(tgt ${test_targets})
 
 	if (TEST_WITH_NON_STANDARD_FORMAT_STRINGS)
 		target_compile_definitions(${tgt} PRIVATE TEST_WITH_NON_STANDARD_FORMAT_STRINGS)
+	endif()
+	if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+		if (TEST_WITH_ADDRESS_SANITIZER)
+			target_compile_options(${tgt} PRIVATE -fno-omit-frame-pointer -fsanitize=address)
+			target_link_options(${tgt} PRIVATE -fno-omit-frame-pointer -fsanitize=address)
+		endif()
 	endif()
 endforeach()
 
