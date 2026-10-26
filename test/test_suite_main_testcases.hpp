@@ -879,6 +879,19 @@ PRINTF_TEST_CASE(avoiding_undefined_behavior_with_expontential)
 
   // May cause UB in call of pow10_of_int() with a high power of 10; see issue #220
   PRINTING_CHECK("0.0014664",               ==, sprintf_, buffer, "%g", 0.0014663999499999749);
+
+  // %g falling back to decimal raises the precision for values with negative exponents;
+  // if this gets past our maximum supported precision and not accounted for, we are in danger
+  // of UB, particularly reading past the end of the precomputed powers-of-10 table; see
+  // issue #239
+
+#if PRINTF_MAX_SUPPORTED_PRECISION >= 6
+  PRINTING_CHECK("0.0001",                  ==, sprintf_, buffer, "%.*g", PRINTF_MAX_SUPPORTED_PRECISION - 1, 0.0001);
+  PRINTING_CHECK("0.000123",                ==, sprintf_, buffer, "%.*g", PRINTF_MAX_SUPPORTED_PRECISION - 1, 0.000123);
+#if PRINTF_MAX_SUPPORTED_PRECISION >= 17
+  PRINTING_CHECK("0.001000000000000000",    ==, sprintf_, buffer, "%#.*g", 16, 0.001);
+#endif
+#endif
 }
 #endif
 
