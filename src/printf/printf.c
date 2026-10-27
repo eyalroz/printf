@@ -76,7 +76,7 @@
 
 
 /*
- * 'ntoa' conversion buffer size, this must be big enough to hold one converted
+ * 'itoa' conversion buffer size, this must be big enough to hold one converted
  * numeric number including padded zeros (dynamically created on stack)
  */
 #ifndef PRINTF_INTEGER_BUFFER_SIZE
@@ -504,7 +504,7 @@ static inline output_gadget_t extern_putchar_gadget(void)
 static inline printf_size_t strnlen_s_(const char* str, printf_size_t maxsize)
 {
   const char* s;
-  for (s = str; maxsize && *s; ++s, --maxsize);
+  for (s = str; maxsize && *s; ++s, --maxsize) {}
   return (printf_size_t)(s - str);
 }
 
@@ -1091,7 +1091,7 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
 
   /*
    * Should we want to fall-back to "%f" mode, and only print the decimal part?
-   * (and remember we have decreased "precision" by 1
+   * (remembering that we have decreased "precision" by 1)
    */
   fall_back_to_decimal_only_mode = (flags & FLAGS_ADAPT_EXP) && (floored_exp10 >= -4) && (floored_exp10 < (int) precision + 1);
 
@@ -1104,7 +1104,6 @@ static void print_exponential_number(output_gadget_t* output, floating_point_t n
       }
       precision--;
     }
-    /* Redo some work :-) */
     floored_exp10 = original_floored_exp10;
     decimal_part_components = get_components(SIGN(negative, abs_number), precision);
     if ((flags & FLAGS_ADAPT_EXP) && floored_exp10 >= -1 && decimal_part_components.integral == (fp_integral_component_t) powers_of_10[floored_exp10 + 1]) {
