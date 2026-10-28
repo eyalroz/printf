@@ -837,6 +837,11 @@ PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
   CHECK(!strcmp(buffer, ""));
 #endif
 
+#if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
+  PRINTING_CHECK("1.500000e+10", ==, sprintf_, buffer, "%f", 1.5e10);
+#else
+  PRINTING_CHECK("", ==, sprintf_, buffer, "%f", 1.5e10);
+#endif
 }
 
 #endif // PRINTF_SUPPORT_DECIMAL_SPECIFIERS

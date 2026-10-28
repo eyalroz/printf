@@ -1181,6 +1181,11 @@ static void print_floating_point(output_gadget_t* output, floating_point_t value
     return;
   }
 
+  /* set default precision, if not set explicitly */
+  if (!(flags & FLAGS_PRECISION)) {
+    precision = PRINTF_DEFAULT_FLOAT_PRECISION;
+  }
+
   if (!prefer_exponential &&
       ((value > PRINTF_FLOAT_NOTATION_THRESHOLD) || (value < -PRINTF_FLOAT_NOTATION_THRESHOLD))) {
     /*
@@ -1192,11 +1197,6 @@ static void print_floating_point(output_gadget_t* output, floating_point_t value
     print_exponential_number(output, value, precision, width, flags, buf, len);
 #endif
     return;
-  }
-
-  /* set default precision, if not set explicitly */
-  if (!(flags & FLAGS_PRECISION)) {
-    precision = PRINTF_DEFAULT_FLOAT_PRECISION;
   }
 
   /* limit precision so that our integer holding the fractional part does not overflow */
