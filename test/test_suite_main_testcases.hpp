@@ -33,13 +33,13 @@ PRINTF_TEST_CASE(space_flag__non_standard_format)
 
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "% s", mkstr("Hello testing"));
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "% u", 1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "% I16u", (uint16_t) 1024);
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "% I32u", (uint32_t) 1024);
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "% I64u", (uint64_t) 1024);
 #endif
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "% u", 4294966272U);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "% I32u", (uint32_t) 4294966272U);
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "% I64u", (uint64_t) 4294966272U);
 #endif
@@ -70,7 +70,7 @@ PRINTF_TEST_CASE(plus_flag)
   PRINTING_CHECK("-1024",                   ==, sprintf_, buffer, "%+d", -1024);
   PRINTING_CHECK("+1024",                   ==, sprintf_, buffer, "%+i", 1024);
   PRINTING_CHECK("-1024",                   ==, sprintf_, buffer, "%+i", -1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("+1024",                   ==, sprintf_, buffer, "%+I16d", (int16_t) 1024);
   PRINTING_CHECK("-1024",                   ==, sprintf_, buffer, "%+I16d", (int16_t) -1024);
   PRINTING_CHECK("+1024",                   ==, sprintf_, buffer, "%+I32d", (int32_t) 1024);
@@ -90,11 +90,11 @@ PRINTF_TEST_CASE(plus_flag__non_standard_format)
 
   PRINTING_CHECK("Hello testing",           ==, sprintf_, buffer, "%+s", mkstr("Hello testing"));
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%+u", 1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%+I32u", (uint32_t) 1024);
 #endif
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%+u", 4294966272U);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%+I32u", (uint32_t) 4294966272U);
 #endif
   PRINTING_CHECK("777",                     ==, sprintf_, buffer, "%+o", 511);
@@ -285,7 +285,7 @@ PRINTF_TEST_CASE(specifier)
   PRINTING_CHECK("777",                     ==, sprintf_, buffer, "%o", 511);
   PRINTING_CHECK("%",                       ==, sprintf_, buffer, "%%");
 
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("127",                     ==, sprintf_, buffer, "%I8d", (int8_t) 127LL);
 #if (SHRT_MAX >= 32767)
   PRINTING_CHECK("32767",                   ==, sprintf_, buffer, "%I16d", (int16_t) 32767LL);
@@ -311,13 +311,13 @@ PRINTF_TEST_CASE(width)
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1i", 1024);
   PRINTING_CHECK("-1024",                   ==, sprintf_, buffer, "%1i", -1024);
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1u", 1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1I16u", (uint16_t) 1024);
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1I32u", (uint32_t) 1024);
   PRINTING_CHECK("1024",                    ==, sprintf_, buffer, "%1I64u", (uint64_t) 1024);
 #endif
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%1u", 4294966272U);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%1I32u", (uint32_t) 4294966272U);
   PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%1I64u", (uint64_t) 4294966272U);
 #endif
@@ -343,13 +343,13 @@ PRINTF_TEST_CASE(width_20)
   PRINTING_CHECK("               -1024",    ==, sprintf_, buffer, "%20i", -1024);
   PRINTING_CHECK("                   0",    ==, sprintf_, buffer, "%20i", 0);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%20u", 1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%20I16u", (uint16_t) 1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%20I32u", (uint32_t) 1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%20I64u", (uint64_t) 1024);
 #endif
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%20u", 4294966272U);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%20I32u", (uint32_t) 4294966272U);
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%20I64u", (uint64_t) 4294966272U);
 #endif
@@ -379,13 +379,13 @@ PRINTF_TEST_CASE(width_asterisk_20)
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*i", 20, 1024);
   PRINTING_CHECK("               -1024",    ==, sprintf_, buffer, "%*i", 20, -1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*u", 20, 1024);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*I16u", 20, (uint16_t) 1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*I32u", 20, (uint32_t) 1024);
   PRINTING_CHECK("                1024",    ==, sprintf_, buffer, "%*I64u", 20, (uint64_t) 1024);
 #endif
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%*u", 20, 4294966272U);
-#ifdef PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
+#if PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%*I32u", 20, (uint32_t) 4294966272U);
   PRINTING_CHECK("          4294966272",    ==, sprintf_, buffer, "%*I64u", 20, (uint64_t) 4294966272U);
 #endif
