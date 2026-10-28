@@ -333,6 +333,11 @@ PRINTF_TEST_CASE(vsnprintf_) {
   CHECK(!strcmp(buffer, "3 -1000 test"));
 }
 
+#ifndef PRINTF_SUPPORT_WRITEBACK_SPECIFIER
+#define PRINTF_SUPPORT_WRITEBACK_SPECIFIER 0
+#endif
+
+#if PRINTF_SUPPORT_WRITEBACK_SPECIFIER
 PRINTF_TEST_CASE(writeback_specifier) {
   char buffer[base_buffer_size];
   (void) buffer; // in case we happen not to use it
@@ -360,6 +365,7 @@ PRINTF_TEST_CASE(writeback_specifier) {
   PRINTING_CHECK("foobar", ==, sprintf_, buffer, "foo%nbar", &num_written.int_);
   CHECK(num_written.int_ == 3);
 }
+#endif // SUPPORT_WRITEBACK_SPECIFIER
 
 PRINTF_TEST_CASE(ret_value)
 {
