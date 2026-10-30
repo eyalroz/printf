@@ -819,6 +819,26 @@ PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 
 }
 
+#if PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS && PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL < 20
+PRINTF_TEST_CASE(fallback_from_decimal_to_exponential_default_precision)
+{
+  char buffer[base_buffer_size];
+  char expected[base_buffer_size];
+
+  sprintf_(expected, "%e", 1.25e20);
+  PRINTING_CHECK(expected, ==, sprintf_, buffer, "%f", 1.25e20);
+
+  sprintf_(expected, "%e", -1.25e20);
+  PRINTING_CHECK(expected, ==, sprintf_, buffer, "%f", -1.25e20);
+
+  sprintf_(expected, "%E", 1.25e20);
+  PRINTING_CHECK(expected, ==, sprintf_, buffer, "%F", 1.25e20);
+
+  sprintf_(expected, "%+020e", 1.25e20);
+  PRINTING_CHECK(expected, ==, sprintf_, buffer, "%+020f", 1.25e20);
+}
+#endif
+
 #endif // PRINTF_SUPPORT_DECIMAL_SPECIFIERS
 
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS || PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS
