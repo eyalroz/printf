@@ -26,6 +26,37 @@ PRINTF_TEST_CASE(space_flag)
 
 #ifdef TEST_WITH_NON_STANDARD_FORMAT_STRINGS
 
+PRINTF_TEST_CASE(digit_grouping_apostrophe_flag)
+{
+  char buffer[base_buffer_size];
+  (void) buffer;
+
+  DISABLE_WARNING_PUSH
+  PRINTING_CHECK("1234",                    ==, sprintf_, buffer, "%'d",         1234);
+  PRINTING_CHECK("-1234567",                ==, sprintf_, buffer, "%'d",         -1234567);
+  PRINTING_CHECK("1234",                    ==, sprintf_, buffer, "%'i",         1234);
+  PRINTING_CHECK("4294966272",              ==, sprintf_, buffer, "%'u",         4294966272U);
+  PRINTING_CHECK("1234abcd",                ==, sprintf_, buffer, "%'x",         305441741);
+  // with other flags, in any order
+  PRINTING_CHECK("+1234",                   ==, sprintf_, buffer, "%'+d",        1234);
+  PRINTING_CHECK("+1234",                   ==, sprintf_, buffer, "%+'d",        1234);
+  PRINTING_CHECK("0000001234",              ==, sprintf_, buffer, "%'010d",      1234);
+  PRINTING_CHECK("0000001234",              ==, sprintf_, buffer, "%0'10d",      1234);
+  PRINTING_CHECK("1234    |",               ==, sprintf_, buffer, "%-'8d|",      1234);
+  PRINTING_CHECK("    1234",                ==, sprintf_, buffer, "%''8d",       1234);
+  // ensure subsequent arguments are not shifted and are used with subsequent specifiers
+  PRINTING_CHECK("1234 abc",                ==, sprintf_, buffer, "%'d %s",      1234, "abc");
+  PRINTING_CHECK("1 1234 2",                ==, sprintf_, buffer, "%d %'d %d",   1, 1234, 2);
+#if PRINTF_SUPPORT_LONG_LONG
+  PRINTING_CHECK("1234567890123 abc",       ==, sprintf_, buffer, "%'lld %s",    1234567890123LL, "abc");
+#endif
+#if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
+  PRINTING_CHECK("1234.50",                 ==, sprintf_, buffer, "%'.2f",       1234.5);
+  PRINTING_CHECK("1234.50 abc",             ==, sprintf_, buffer, "%'.2f %s",    1234.5, "abc");
+#endif
+  DISABLE_WARNING_POP
+}
+
 PRINTF_TEST_CASE(space_flag__non_standard_format)
 {
   char buffer[base_buffer_size];

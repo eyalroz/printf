@@ -1224,11 +1224,13 @@ static printf_flags_t parse_flags(const char** format)
   printf_flags_t flags = 0U;
   do {
     switch (**format) {
-      case '0': flags |= FLAGS_ZEROPAD; (*format)++; break;
-      case '-': flags |= FLAGS_LEFT;    (*format)++; break;
-      case '+': flags |= FLAGS_PLUS;    (*format)++; break;
-      case ' ': flags |= FLAGS_SPACE;   (*format)++; break;
-      case '#': flags |= FLAGS_HASH;    (*format)++; break;
+      case '0' : flags |= FLAGS_ZEROPAD; (*format)++; break;
+      case '-' : flags |= FLAGS_LEFT;    (*format)++; break;
+      case '+' : flags |= FLAGS_PLUS;    (*format)++; break;
+      case ' ' : flags |= FLAGS_SPACE;   (*format)++; break;
+      case '#' : flags |= FLAGS_HASH;    (*format)++; break;
+      /* POSIX 2008 mandates support for digit group separation; this is not implemented. */
+      case '\'':                         (*format)++; break;
       default : return flags;
     }
   } while (true);

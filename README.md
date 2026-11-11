@@ -215,7 +215,7 @@ Notes:
 | (space) | If no sign is going to be written, a blank space is inserted before the value. |
 | `#`     | Used with o, b, x or X specifiers the value is preceded with 0, 0b, 0x or 0X respectively for values different than zero.<br>Used with f, F it forces the written output to contain a decimal point even if no more digits follow. By default, if no digits follow, no decimal point is written. |
 | `0`     | Left-pads the number with zeros (0) instead of spaces when padding is specified (see width sub-specifier). |
-
+| `'`     | An ignored POSIX 2008 flag: Indicates the request of digit group separation by a locale-dependent separator; this is not supported, so the flag is recognized but ignored |
 
 #### Width Specifiers
 
