@@ -813,7 +813,13 @@ static struct floating_point_components get_normalized_components(bool negative,
   components.fractional += (scaled_remainder >= rounding_threshold);
   if (scaled_remainder == rounding_threshold) {
     /* banker's rounding: Round towards the even number (making the mean error 0) */
-    components.fractional &= ~((fp_integral_component_t) 0x1);
+    if (precision == 0U) {
+      /* No fractional digits are shown, so the last digit is the integral one: 1.5 -> 2, 2.5 -> 2 */
+      components.fractional = components.integral & 1U;
+    }
+    else {
+      components.fractional &= ~((fp_integral_component_t) 0x1);
+    }
   }
   /*
    * handle rollover, e.g. the case of 0.99 with precision 1 becoming (0,100),

@@ -781,6 +781,20 @@ PRINTF_TEST_CASE(tiny_floating_point_values)
 
 #if PRINTF_SUPPORT_DECIMAL_SPECIFIERS
 
+PRINTF_TEST_CASE(exponential_with_zero_precision_rounds_half_to_even)
+{
+  char buffer[base_buffer_size];
+  (void) buffer;
+
+  // With no fractional digits shown, a tie goes to the even leading digit
+  PRINTING_CHECK("4e+00",                   ==, sprintf_, buffer, "%.0e", 3.5);
+  PRINTING_CHECK("2e+01",                   ==, sprintf_, buffer, "%.0e", 15.0);
+  PRINTING_CHECK("2e+01",                   ==, sprintf_, buffer, "%.0e", 25.0);
+  PRINTING_CHECK("1e+02",                   ==, sprintf_, buffer, "%.0e", 95.0);
+  PRINTING_CHECK("2e+01",                   ==, sprintf_, buffer, "%.1g", 15.0);
+  PRINTING_CHECK("1e+02",                   ==, sprintf_, buffer, "%.1g", 95.0);
+}
+
 PRINTF_TEST_CASE(fallback_from_decimal_to_exponential)
 {
   char buffer[base_buffer_size];
