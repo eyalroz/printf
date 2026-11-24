@@ -808,23 +808,28 @@ static struct floating_point_components get_normalized_components(bool negative,
   scaled_remainder = apply_scaling(remainder, account_for_precision);
 
   components.fractional = (fp_integral_component_t) scaled_remainder; /* when precision == 0, the assigned value should be 0 */
-  scaled_remainder -= (floating_point_t) components.fractional; /* when precision == 0, this will not change scaled_remainder */
-
-  components.fractional += (scaled_remainder >= rounding_threshold);
-  if (scaled_remainder == rounding_threshold) {
-    /* banker's rounding: Round towards the even number (making the mean error 0) */
-    components.fractional &= ~((fp_integral_component_t) 0x1);
+  if (precision > 0) {
+    scaled_remainder -= (floating_point_t) components.fractional;
+    components.fractional += (scaled_remainder >= rounding_threshold);
+    if (scaled_remainder == rounding_threshold) {
+      /* Banker's rounding: Round towards the even number (making the mean error 0) */
+      components.fractional &= ~((fp_integral_component_t) 0x1);
+    }
+    /*
+     * handle rollover, e.g. the case of 0.99 with precision 1 becoming (0,100),
+     * and must then be corrected into (1, 0).
+     * Note: for precision = 0, this will "translate" the rounding effect from
+     * the fractional part to the integral part where it should actually be
+     * felt (as prec_power_of_10 is 1)
+     */
+    if ((floating_point_t) components.fractional >= prec_power_of_10) {
+      components.fractional = 0;
+      ++components.integral;
+    }
   }
-  /*
-   * handle rollover, e.g. the case of 0.99 with precision 1 becoming (0,100),
-   * and must then be corrected into (1, 0).
-   * Note: for precision = 0, this will "translate" the rounding effect from
-   * the fractional part to the integral part where it should actually be
-   * felt (as prec_power_of_10 is 1)
-   */
-  if ((floating_point_t) components.fractional >= prec_power_of_10) {
-    components.fractional = 0;
-    ++components.integral;
+  else { /* precision == 0, components.fractional is then also 0 */
+    /* Banker's rounding: Round towards the even number (making the mean error 0) */
+    components.integral += (scaled_remainder == rounding_threshold && components.integral & 1U);
   }
   return components;
 }
