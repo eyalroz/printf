@@ -964,13 +964,13 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
   PRINTING_CHECK("a0.5  ",                  ==, sprintf_, buffer, "a%-5.1f", 0.5);
   PRINTING_CHECK("a0.5  end",               ==, sprintf_, buffer, "a%-5.1fend", 0.5);
 
-  /* %f for double */
+  // %f for double
   PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12f", 42.89522312345678);
-  /* %F for double */
+  // %F for double
   PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12F", 42.89522312345678);
-  /* %lf for double */
+  // %lf for double
   PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12lf", 42.89522312345678);
-  /* %Lf for long double */
+  // %Lf for long double
   PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12Lf", 42.89522312345678l);
   PRINTING_CHECK("42.895223123457",         ==, sprintf_, buffer, "%.12Lf", 42.89522312345678L);
 
@@ -1005,23 +1005,23 @@ PRINTF_TEST_CASE(floating_point_specifiers_precision_and_flags)
   PRINTING_CHECK("9.2524e+04",              ==, sprintf_, buffer, "%.4e", 92523.5);
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375);
 
-  /* %g for double */
+  // %g for double
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3g", 99.998580932617187500);
-  /* %G for double */
+  // %G for double
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3G", 99.998580932617187500);
-  /* %lg for double */
+  // %lg for double
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3lg", 99.998580932617187500);
-  /* %Lg for long double */
+  // %Lg for long double
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3Lg", 99.998580932617187500l);
   PRINTING_CHECK("100.",                    ==, sprintf_, buffer, "%#.3Lg", 99.998580932617187500L);
 
-  /* %e for double */
+  // %e for double
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9e", -83809.234375);
-  /* %E for double */
+  // %E for double
   PRINTING_CHECK("-8.380923438E+04",        ==, sprintf_, buffer, "%.9E", -83809.234375);
-  /* %le for double */
+  // %le for double
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9le", -83809.234375);
-  /* %Le for long double */
+  // %Le for long double
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9Le", -83809.234375l);
   PRINTING_CHECK("-8.380923438e+04",        ==, sprintf_, buffer, "%.9Le", -83809.234375L);
 #endif
